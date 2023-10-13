@@ -6,7 +6,7 @@ typedef jit_value (*plfuc)(unsigned char);
 typedef jit_value (*plfus)(unsigned short);
 typedef jit_value (*plfpcus)(char *, unsigned short);
 
-// function which computes an average of three numbers each occupying 2 bytes 
+// function which computes an average of three numbers each occupying 2 bytes
 DEFINE_TEST(test1)
 {
 	plfsss f1;
@@ -40,7 +40,7 @@ DEFINE_TEST(test1)
 	jit_subi(p, R(1), R(1), 1);
 	jit_jmpi(p, loop);
 
-	jit_patch(p, end);	
+	jit_patch(p, end);
 	jit_retr(p, R(2));
 
 	// TEST 3
@@ -101,10 +101,10 @@ DEFINE_TEST(test1)
 
 	// TEST 5
 
-	plfpcus f5; // string, radix -> long 
+	plfpcus f5; // string, radix -> long
 
 	jit_prolog(p, &f5);
-	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(intptr_t));
 	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(short));
 
 	// R(0): string
@@ -158,7 +158,7 @@ DEFINE_TEST(test1)
 	return 0;
 }
 
-void test_setup() 
+void test_setup()
 {
 	test_filename = __FILE__;
 	SETUP_TEST(test1);

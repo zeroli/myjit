@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 typedef struct spd_t {
-	unsigned long pc;
+	uintptr_t  pc;
 	uint32_t *ibuf;
 	unsigned int ibuf_index;
 	unsigned int ibuf_size;
@@ -32,4 +32,4 @@ void spd_init(spd_t *);
 void spd_set_input_buffer(spd_t *, unsigned char *, int);
 int spd_disassemble(spd_t *);
 char *spd_insn_asm(spd_t *);
-void spd_set_pc(spd_t *, unsigned long);
+void spd_set_pc(spd_t *, uintptr_t );

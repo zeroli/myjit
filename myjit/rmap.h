@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -26,8 +26,8 @@
 #define RMAP_UNLOAD (1)
 #define RMAP_LOAD (2)
 
-static inline void unload_reg(jit_op * op,  jit_hw_reg * hreg, long virt_reg);
-static inline void load_reg(struct jit_op * op, jit_hw_reg * hreg, long reg);
+static inline void unload_reg(jit_op * op,  jit_hw_reg * hreg, jit_value virt_reg);
+static inline void load_reg(struct jit_op * op, jit_hw_reg * hreg, jit_value reg);
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -115,7 +115,7 @@ static int rmap_equal(jit_op * op, jit_rmap * current, jit_rmap * target)
 
 /**
  * Synchronizes two register mappings
- * if (mode == LOAD): 	then it loads registers which are not present in the current mapping, 
+ * if (mode == LOAD): 	then it loads registers which are not present in the current mapping,
  * 			however, are in the target mapping
  * if (mode == UNLOAD): then it unloads registers which are in the current mapping,
  * 			however, which are not in the target mapping
@@ -155,7 +155,7 @@ static int candidate_score(jit_op * op, jit_value virtreg, jit_hw_reg * hreg, in
 {
 	int score = 0;
 	score -= hreg->priority;
-	
+
 	jit_value x;
 	int hw_associated = (rmap_is_associated(op->regmap, hreg->id, hreg->fp, &x) != NULL);
 
@@ -230,7 +230,7 @@ static jit_hw_reg * rmap_spill_candidate(struct jit_reg_allocator * al, jit_op *
 		int score = candidate_score(op, virtreg, &(regs[i]), &sp, &assoc);
 		if (score > best_score) {
 			if (sp) {
-				*reg_to_spill = assoc; 
+				*reg_to_spill = assoc;
 				*spill = sp;
 			} else {
 				*reg_to_spill = -1;

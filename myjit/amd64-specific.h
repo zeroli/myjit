@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -109,11 +109,11 @@ static inline void emit_set_fparg(struct jit * jit, struct jit_out_arg * arg)
 {
 	int sreg;
 	int reg = jit->reg_al->fp_arg_regs[arg->argpos]->id;
-	long value = arg->value.generic;
+	intptr_t value = arg->value.generic;
 	if (arg->isreg) {
 		if (is_spilled(value, jit->prepared_args.op, &sreg)) {
 			int pos = GET_REG_POS(jit, value);
-			if (arg->size == sizeof(float)) 
+			if (arg->size == sizeof(float))
 				amd64_sse_cvtsd2ss_reg_membase(jit->ip, reg, AMD64_RBP, pos);
 			else amd64_sse_movlpd_xreg_membase(jit->ip, reg, AMD64_RBP, pos);
 		} else {
@@ -171,7 +171,7 @@ static inline void emit_fppush_arg(struct jit * jit, struct jit_out_arg * arg)
 			}
 		} else {
 			double b = arg->value.fp;
-			unsigned long tmp;
+			uintptr_t  tmp;
 			memcpy(&tmp, &b, sizeof(double));
 			amd64_mov_reg_imm_size(jit->ip, AMD64_RAX, tmp, 8);
 			amd64_push_reg(jit->ip, AMD64_RAX);
@@ -188,9 +188,9 @@ static inline void emit_fppush_arg(struct jit * jit, struct jit_out_arg * arg)
 			amd64_sse_movlpd_membase_xreg(jit->ip, AMD64_XMM0, AMD64_RSP, 0);
 		} else {
 			float b = arg->value.fp;
-			unsigned long tmp = 0;
+			uintptr_t  tmp = 0;
 			memcpy(&tmp, &b, sizeof(float));
-			
+
 			amd64_mov_reg_imm_size(jit->ip, AMD64_RAX, tmp, 8);
 			amd64_push_reg(jit->ip, AMD64_RAX);
 		}
@@ -229,7 +229,7 @@ static inline int emit_arguments(struct jit * jit)
 	}
 	/* AL is used to pass the number of floating point arguments passed through the XMM0-XMM7 registers */
 	int fp_reg_arg_cnt = MIN(jit->prepared_args.fp_args, jit->reg_al->fp_arg_reg_cnt);
-	if (fp_reg_arg_cnt != 0) amd64_mov_reg_imm(jit->ip, AMD64_RAX, fp_reg_arg_cnt); 
+	if (fp_reg_arg_cnt != 0) amd64_mov_reg_imm(jit->ip, AMD64_RAX, fp_reg_arg_cnt);
 	else amd64_alu_reg_reg_size(jit->ip, X86_XOR, AMD64_RAX, AMD64_RAX, 4);
 	return stack_correction;
 }
@@ -251,7 +251,7 @@ static void emit_funcall(struct jit * jit, struct jit_op * op, int imm)
 			// external functions may reside anywhere in the memory
 			// even in the place which is not addressable with 32bit wide value
 			// therefore external functions are called using %r11 register
-			// which is caller-saved register and its value should be already on stack 
+			// which is caller-saved register and its value should be already on stack
 			amd64_mov_reg_imm_size(jit->ip, AMD64_R11, op->arg[0], 8);
 			amd64_call_reg(jit->ip, AMD64_R11);
 		}
@@ -365,14 +365,14 @@ static void emit_fret_op(struct jit * jit, jit_op * op)
 		sse_cvtsd2ss_reg_reg(jit->ip, ret_reg->id, arg);
 	} else {
 		if (ret_reg->id != arg) sse_movsd_reg_reg(jit->ip, ret_reg->id, arg);
-	}	
+	}
 /*
-	if (op->arg_size == sizeof(float)) 
+	if (op->arg_size == sizeof(float))
 		sse_cvtsd2ss_reg_reg(jit->ip, arg, arg);
 
 	// pushes the value beyond the top of the stack
-	if ((op->arg_size == sizeof(float))) sse_movss_reg_membase(jit->ip, arg, COMMON86_SP, -8); 
-	else sse_movlpd_membase_xreg(jit->ip, arg, COMMON86_SP, -8); 
+	if ((op->arg_size == sizeof(float))) sse_movss_reg_membase(jit->ip, arg, COMMON86_SP, -8);
+	else sse_movlpd_membase_xreg(jit->ip, arg, COMMON86_SP, -8);
 	common86_mov_reg_membase(jit->ip, COMMON86_AX, COMMON86_SP, -8, 8);
 	// transfers the value from the stack to XMM0
 
@@ -462,7 +462,7 @@ struct jit_reg_allocator * jit_reg_allocator_create()
 	a->fpret_reg = &(a->fp_regs[0]);
 
 	a->gp_arg_reg_cnt = 6;
-	a->gp_arg_regs = JIT_MALLOC(sizeof(jit_hw_reg *) * 6); 
+	a->gp_arg_regs = JIT_MALLOC(sizeof(jit_hw_reg *) * 6);
 	a->gp_arg_regs[0] = &(a->gp_regs[5]);
 	a->gp_arg_regs[1] = &(a->gp_regs[4]);
 	a->gp_arg_regs[2] = &(a->gp_regs[3]);
@@ -471,7 +471,7 @@ struct jit_reg_allocator * jit_reg_allocator_create()
 	a->gp_arg_regs[5] = &(a->gp_regs[7]);
 
 	a->fp_arg_reg_cnt = 8;
-	a->fp_arg_regs = JIT_MALLOC(sizeof(jit_hw_reg *) * 8); 
+	a->fp_arg_regs = JIT_MALLOC(sizeof(jit_hw_reg *) * 8);
 	for (int i = 0; i < 8; i++)
 		a->fp_arg_regs[i] = &(a->fp_regs[i]);
 

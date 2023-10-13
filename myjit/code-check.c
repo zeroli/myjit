@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -37,8 +37,8 @@ static struct jit_disasm jit_debugging_disasm =  {
 	.reg_unknown_template = "(unknown reg.)",
 	.label_template = "<label>",
 	.label_forward_template = "<label>",
-	.generic_addr_template = "<addr: 0x%lx>",
-	.generic_value_template = "0x%lx",
+	.generic_addr_template = "<addr: 0x%llx>",
+	.generic_value_template = "0x%llx",
 };
 
 
@@ -65,7 +65,7 @@ static void cleanup(struct jit *jit)
 		if (op->live_in) {
 			jit_set_free(op->live_in);
 			op->live_in = NULL;
-		} 
+		}
 		if (op->live_out) {
 			jit_set_free(op->live_out);
 			op->live_out = NULL;
@@ -124,7 +124,7 @@ static int check_op_without_effect(jit_op *op, char *msg_buf)
 static void print_regs(jit_tree_key reg, jit_tree_value v, void *thunk)
 {
 	char buf[32];
-	if (reg == R_FP) return; 
+	if (reg == R_FP) return;
 	jit_get_reg_name(&jit_debugging_disasm, buf, reg);
 	strcat(thunk, " ");
 	strcat(thunk, buf);
@@ -133,7 +133,7 @@ static void print_regs(jit_tree_key reg, jit_tree_value v, void *thunk)
 static int check_uninitialized_registers(jit_op *op, char *msg_buf)
 {
 	if (GET_OP(op) != JIT_PROLOG) return 0;
-	
+
 	if (op->live_in->root != NULL) {
 		char buf[4096];
 		buf[0] = '\0';
@@ -158,7 +158,7 @@ static int valid_size(int size) {
 	}
 }
 
-static int valid_fsize(int size) 
+static int valid_fsize(int size)
 {
 	return (size == 4) || (size == 8);
 }
@@ -199,7 +199,7 @@ static int check_register_types(struct jit *jit, jit_op *op, char *msg_buf)
 				if (CHECK_ARG_TYPE(op, 1, JIT_RTYPE_FLOAT)) return 0;
 			} else {
 				if (CHECK_ARG_TYPE(op, 1, JIT_RTYPE_INT)) return 0;
-			} 
+			}
 			break;
 		}
 		case JIT_FST:
@@ -222,7 +222,7 @@ static int check_register_types(struct jit *jit, jit_op *op, char *msg_buf)
 		case JIT_FORCE_SPILL:
 		case JIT_FORCE_ASSOC:
 			return 0;
-		default: 
+		default:
 			if (!op->fp && CHECK_ARG_TYPE(op, 1, JIT_RTYPE_INT) && CHECK_ARG_TYPE(op, 2, JIT_RTYPE_INT) && CHECK_ARG_TYPE(op, 3, JIT_RTYPE_INT)) return 0;
 			if (op->fp && CHECK_ARG_TYPE(op, 1, JIT_RTYPE_FLOAT) && CHECK_ARG_TYPE(op, 2, JIT_RTYPE_FLOAT) && CHECK_ARG_TYPE(op, 3, JIT_RTYPE_FLOAT)) return 0;
 	}
@@ -230,11 +230,11 @@ static int check_register_types(struct jit *jit, jit_op *op, char *msg_buf)
 	return JIT_WARN_REGISTER_TYPE_MISMATCH;
 }
 
-static int jit_op_is_data_op(jit_op *op) 
+static int jit_op_is_data_op(jit_op *op)
 {
 	while (op && ((GET_OP(op) == JIT_LABEL) || (GET_OP(op) == JIT_PATCH))) op = op->next;
 	if (!op) return 0;
-	
+
 	jit_opcode code = GET_OP(op);
 	return ((code == JIT_DATA_BYTE) || (code == JIT_DATA_BYTES) || (code == JIT_DATA_REF_CODE) || (code == JIT_DATA_REF_DATA));
 }
@@ -245,7 +245,7 @@ static int check_data_alignment(jit_op *op, char *msg_buf)
 	if ((GET_OP(op) == JIT_LABEL) || (GET_OP(op) == JIT_PATCH)) return 0;
 	jit_op * prev = op->prev;
 	while (prev) {
-		if ((GET_OP(prev) == JIT_LABEL) || (GET_OP(prev) == JIT_PATCH)) 
+		if ((GET_OP(prev) == JIT_LABEL) || (GET_OP(prev) == JIT_PATCH))
 			prev = prev->prev;
 		else break;
 	}

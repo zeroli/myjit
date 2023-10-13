@@ -20,7 +20,7 @@ static void override_print_address(bfd_vma addr, struct disassemble_info *info)
 	char * buf = info->stream;
 	buf += strlen(buf);
 
-	sprintf(buf, "0x%lx", (long)addr);
+	sprintf(buf, "0x%llx", (intptr_t)addr);
 }
 
 static void * get_libocodes_handle()
@@ -54,7 +54,7 @@ static void * get_libocodes_handle()
 int opcodes_based_debugger(struct jit * jit)
 {
 	struct disassemble_info info;
-	unsigned long count, pc, buf_size;
+	uintptr_t  count, pc, buf_size;
 	char output_buf[OUTPUT_BUF_SIZE];
 	char * error;
 
@@ -107,7 +107,7 @@ int opcodes_based_debugger(struct jit * jit)
 		return -1;
 	}
 
-	buf_size = (unsigned long)(jit->ip - jit->buf);
+	buf_size = (uintptr_t)(jit->ip - jit->buf);
 	info.buffer = (void *)jit->buf;
 	info.buffer_length = buf_size;
 

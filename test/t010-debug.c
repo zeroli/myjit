@@ -13,7 +13,7 @@ DEFINE_TEST(test1)
 
 	plfl factorial;
 	jit_prolog(p, &factorial);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), 1);
 	jit_movi(p, R(2), 999);
@@ -36,7 +36,7 @@ DEFINE_TEST(test1)
 	jit_jmpi(p, loop);
 
 	jit_patch(p, o);
-	
+
 	jit_msg(p, "Check X.\n");
 	jit_retr(p, R(1));
 
@@ -80,7 +80,7 @@ DEFINE_TEST(test2)
 
 	plfl x;
 	jit_op *op01 = jit_prolog(p, &x);
-	jit_op *op01a = jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_op *op01a = jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 	jit_op *op01b = jit_declare_arg(p, JIT_PTR, 10);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
 	jit_op *op02 = jit_movr(p, R(0), R(1));
@@ -93,10 +93,10 @@ DEFINE_TEST(test2)
 	jit_op *op07 = jit_retr(p, R(0));
 
 	jit_op *op08 = jit_patch(p, op05);
-	jit_op *op09 = jit_ldi(p, R(2), NULL, 3); 
-	jit_op *op10 = jit_fldi(p, FR(2), NULL, 2); 
+	jit_op *op09 = jit_ldi(p, R(2), NULL, 3);
+	jit_op *op10 = jit_fldi(p, FR(2), NULL, 2);
 
-	
+
 	jit_label *label2 = jit_get_label(p);
 	jit_data_dword(p, 0xcaca0);
 
@@ -140,7 +140,7 @@ DEFINE_TEST(test2)
 	ASSERT_WARNING(op17, JIT_WARN_REGISTER_TYPE_MISMATCH | JIT_WARN_OP_WITHOUT_EFFECT);
 	ASSERT_WARNING(op18, JIT_WARN_REGISTER_TYPE_MISMATCH | JIT_WARN_OP_WITHOUT_EFFECT);
 	ASSERT_WARNING(op19, JIT_WARN_REGISTER_TYPE_MISMATCH | JIT_WARN_OP_WITHOUT_EFFECT);
-	
+
 	return 0;
 #else
 	IGNORE_TEST
@@ -163,13 +163,13 @@ DEFINE_TEST(test3)
 	jit_retr(p, R(0));
 
 	JIT_GENERATE_CODE(p);
-	
+
 	ASSERT_EQ(50, x());
 	ASSERT_EQ(JIT_NOP, op03->code);
 
 	fclose(stdout);
 	stdout = old_stdout;
-		
+
 	return 0;
 #else
 	IGNORE_TEST

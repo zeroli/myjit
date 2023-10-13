@@ -1,6 +1,6 @@
 #include "tests.h"
 
-typedef long (* plf10s)(short, short, short, short, short, short, short, short, short, short);
+typedef intptr_t (* plf10s)(short, short, short, short, short, short, short, short, short, short);
 
 DEFINE_TEST(test1)
 {
@@ -18,7 +18,7 @@ DEFINE_TEST(test1)
 	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(short));
 	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(short));
 	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(short));
-	
+
 	jit_getarg(p, R(0), 0);
 	jit_getarg(p, R(1), 1);
 	jit_getarg(p, R(2), 2);
@@ -30,7 +30,7 @@ DEFINE_TEST(test1)
 	jit_getarg(p, R(8), 8);
 	jit_getarg(p, R(9), 9);
 
-	
+
 	jit_movi(p, R(10), 0);
 	jit_addr(p, R(10), R(10), R(9));
 	jit_addr(p, R(11), R(10), R(8));

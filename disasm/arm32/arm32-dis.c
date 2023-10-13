@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2017 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,7 +28,7 @@
 #define ror(x, shift) ((((unsigned int) (x)) >> (shift)) | ((unsigned int) (x) << (32 - (shift))))
 #define ABS(x)  ((x) < 0 ? - (x) : x)
 
-#define B(x, index, mask_length) ((((unsigned long) x) >> index) & ((1UL << mask_length) - 1))
+#define B(x, index, mask_length) ((((uintptr_t) x) >> index) & ((1UL << mask_length) - 1))
 
 static char* shift_type[] = { "lsl", "lsr", "asr", "ror" };
 
@@ -104,9 +104,9 @@ static void arm32d_out_name(arm32d_t *dis, uint32_t insn, char *opname)
 
 static void arm32d_out_addr(arm32d_t *dis, int addr)
 {
-	arm32d_out_printf(dis->out, "%x <pc %s %i>", 
+	arm32d_out_printf(dis->out, "%x <pc %s %i>",
 			dis->pc + addr,
-			addr < 0 ? "-" : "+", 
+			addr < 0 ? "-" : "+",
 			ABS(addr));
 }
 
@@ -136,8 +136,8 @@ static void arm32d_out_dreg(arm32d_t *dis, int reg)
 static void arm32d_out_sreg(arm32d_t *dis, int reg)
 {
 	static char *regs[] = {
-		"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", 
-		"s10", "s11", "s12", "s13", "s14", "s15", "s16", "s17", "s18", "s19", "s20", 
+		"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10",
+		"s10", "s11", "s12", "s13", "s14", "s15", "s16", "s17", "s18", "s19", "s20",
 		"s20", "s21", "s22", "s23", "s24", "s25", "s26", "s27", "s28", "s29", "s30",
 		"s31" };
 
@@ -242,7 +242,7 @@ static void decode_bx(arm32d_t *dis, uint32_t insn, int link)
 	if (link) arm32d_out_name(dis, insn, "blx");
 	else arm32d_out_name(dis, insn, "bx");
 	arm32d_out_reg(dis, B(insn, 0, 4));
-} 
+}
 
 static void decode_branch(arm32d_t *dis, uint32_t insn)
 {
@@ -377,7 +377,7 @@ static void decode_stack_op(arm32d_t *dis, uint32_t insn, char *name)
 			if (regs) arm32d_out_comma(dis);
 		}
 	}
-		
+
 	arm32d_out_printf(dis->out, "}");
 }
 
@@ -599,8 +599,8 @@ static void decode(arm32d_t *dis, uint32_t insn)
 	else if (B(insn, 25, 3) == 0x0) decode_dataop_reg(dis, insn);
 	else if ((B(insn, 21, 7) == 0x70) && (B(insn, 0, 12) == 0xa10)) decode_vmov_float_reg(dis, insn);
 	else if ((B(insn, 21, 7) == 0x70) && (B(insn, 8, 4) == 0xb) && (B(insn, 0, 8) == 0x10)) decode_vmov_sreg_reg(dis, insn);
-	else if ((B(insn, 16, 12) == 0xd2d) && (B(insn, 8, 4) == 0xb) && (B(insn, 0, 8) == 0x2)) decode_vstack(dis, insn, "vpush"); 
-	else if ((B(insn, 16, 12) == 0xcbd) && (B(insn, 8, 4) == 0xb) && (B(insn, 0, 8) == 0x2)) decode_vstack(dis, insn, "vpop"); 
+	else if ((B(insn, 16, 12) == 0xd2d) && (B(insn, 8, 4) == 0xb) && (B(insn, 0, 8) == 0x2)) decode_vstack(dis, insn, "vpush");
+	else if ((B(insn, 16, 12) == 0xcbd) && (B(insn, 8, 4) == 0xb) && (B(insn, 0, 8) == 0x2)) decode_vstack(dis, insn, "vpop");
 	else if ((B(insn, 23, 5) == 0x1d) && (B(insn, 19, 3) == 0x7) && (B(insn, 9, 3) == 0x5) && (B(insn, 6, 1))) decode_vcvt(dis, insn);
 	else if ((B(insn, 16, 12) == 0xeb7) && (B(insn, 9, 3) == 0x5) && (B(insn, 4, 4) == 0xc)) decode_vcvtff(dis, insn);
 	else if ((B(insn, 24, 4)) == 0xd) decode_vfp_data_transfer(dis, insn);
@@ -645,7 +645,7 @@ char *arm32d_insn_asm(arm32d_t *dis)
 	return dis->out;
 }
 
-void arm32d_set_pc(arm32d_t *dis, unsigned long pc)
+void arm32d_set_pc(arm32d_t *dis, uintptr_t  pc)
 {
 	dis->pc = pc;
 }

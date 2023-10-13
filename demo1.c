@@ -5,7 +5,7 @@
 #include "myjit/jitlib.h"
 
 // pointer to a function accepting one argument of type long and returning long value
-typedef long (* plfl)(long);
+typedef long long (* plfl)(intptr_t);
 
 int main()
 {
@@ -18,7 +18,7 @@ int main()
 	jit_prolog(p, &foo);
 
 	// the first argument of the function is signed number of size `long'
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	// moves the first argument into the register R(0)
 	jit_getarg(p, R(0), 0);
@@ -37,9 +37,9 @@ int main()
 	jit_dump_ops(p, JIT_DEBUG_CODE);
 
 	// check
-	printf("Check #1: %li\n", foo(1));
-	printf("Check #2: %li\n", foo(100));
-	printf("Check #3: %li\n", foo(255));
+	printf("Check #1: %lli\n", foo(1));
+	printf("Check #2: %lli\n", foo(100));
+	printf("Check #3: %lli\n", foo(255));
 
 	// cleanup
 	jit_free(p);

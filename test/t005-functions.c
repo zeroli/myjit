@@ -8,7 +8,7 @@ typedef jit_value (*plfuc)(unsigned char);
 typedef jit_value (*plfus)(unsigned short);
 typedef jit_value (*plfpcus)(char *, unsigned short);
 
-// function which computes an average of three numbers each occupying 2 bytes 
+// function which computes an average of three numbers each occupying 2 bytes
 DEFINE_TEST(test1)
 {
 	plfsss f1;
@@ -47,7 +47,7 @@ DEFINE_TEST(test2)
 	jit_subi(p, R(1), R(1), 1);
 	jit_jmpi(p, loop);
 
-	jit_patch(p, end);	
+	jit_patch(p, end);
 	jit_retr(p, R(2));
 	JIT_GENERATE_CODE(p);
 
@@ -128,10 +128,10 @@ DEFINE_TEST(test4)
 // function which converts string to number
 DEFINE_TEST(test5)
 {
-	plfpcus f1; // string, radix -> long 
+	plfpcus f1; // string, radix -> long
 
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(intptr_t));
 	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(short));
 
 	// R(0): string
@@ -184,11 +184,11 @@ DEFINE_TEST(test6)
 {
 	static char *str = "Hello, World! Lucky number for today is %i!!!\n";
 	static char buf[120];
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 	jit_movi(p, R(0), str);
-	
+
 	jit_movi(p, R(1), 100);
 	//jit_movi(p, R(2), 200);
 	//jit_movi(p, R(3), 300);
@@ -221,14 +221,14 @@ DEFINE_TEST(test7)
 
 	simple_buffer(BUFFER_CLEAR, NULL);
 
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 	int arr = jit_allocai(p, ARR_SIZE  * REG_SIZE); // allocates an array
 
 	jit_movi(p, R(0), 1);				// sets up the first element
-	jit_stxi(p, arr, R_FP, R(0), REG_SIZE);	
-	
+	jit_stxi(p, arr, R_FP, R(0), REG_SIZE);
+
 	jit_addi(p, R(0), R_FP, arr);			// pointer to the array
 	jit_addi(p, R(1), R(0), REG_SIZE);		// position in the array (2nd element)
 	jit_movi(p, R(2), ARR_SIZE - 1);		// counter
@@ -243,7 +243,7 @@ DEFINE_TEST(test7)
 	jit_subi(p, R(2), R(2), 1);
 	jit_bgti(p, loop, R(2), 0);
 
-	jit_movi(p, R(2), ARR_SIZE - 1);		
+	jit_movi(p, R(2), ARR_SIZE - 1);
 
 	jit_label * loop2 = jit_get_label(p);
 
@@ -285,11 +285,11 @@ DEFINE_TEST(test8)
 	s.sum = 111;
 	s.avg = 123;
 
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 
-	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(long));	// count
+	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(intptr_t));	// count
 
 	//jit_movi(p, R(1), &s); // struct
 
@@ -302,13 +302,13 @@ DEFINE_TEST(test8)
 
 	jit_ldxr(p, R(4), R(2), R(3), sizeof(short));
 	jit_addr(p, R(5), R(5), R(4));
-	
+
 	jit_addi(p, R(3), R(3), sizeof(short));
 	jit_subi(p, R(0), R(0), 1);
 
 	jit_bgti(p, loop, R(0), 0);
 	jit_sti(p, (unsigned char *)&s + offsetof(struct mystruct, sum), R(5), sizeof(short));
-	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(long));	// count
+	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(intptr_t));	// count
 
 	jit_divr(p, R(5), R(5), R(0));
 

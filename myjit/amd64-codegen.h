@@ -9,7 +9,7 @@
  *   Dietmar Maurer (dietmar@ximian.com)
  *   Patrik Torstensson
  *   Zalman Stern
- * 
+ *
  * Copyright (C)  2000 Intel Corporation.  All rights reserved.
  * Copyright (C)  2001, 2002 Ximian, Inc.
  * Copyright (C)  2010, Petr Krajca
@@ -161,7 +161,7 @@ typedef union {
 #define amd64_sib_index(sib) (((sib) >> 3) & 0x7)
 #define amd64_sib_base(sib) ((sib) & 0x7)
 
-#define amd64_is_imm32(val) ((long)val >= -((long)1<<31) && (long)val <= (((long)1<<31)-1))
+#define amd64_is_imm32(val) ((intptr_t)val >= -((intptr_t)1<<31) && (intptr_t)val <= (((intptr_t)1<<31)-1))
 
 #define x86_imm_emit64(inst,imm)     \
 	do {	\
@@ -817,13 +817,13 @@ do {     \
 
 #define amd64_call_membase_size(inst,basereg,disp,size) do { amd64_emit_rex ((inst),0,0,0,(basereg)); *(inst)++ = (unsigned char)0xff; amd64_membase_emit ((inst),2, (basereg),(disp)); } while (0)
 #define amd64_jump_membase_size(inst,basereg,disp,size) do { amd64_emit_rex ((inst),0,0,0,(basereg)); *(inst)++ = (unsigned char)0xff; amd64_membase_emit ((inst), 4, (basereg), (disp)); } while (0)
-    
+
 #define amd64_jump_code_size(inst,target,size) do { \
-	if (amd64_is_imm32 ((long)(target) - (long)(inst))) {		\
+	if (amd64_is_imm32 ((intptr_t)(target) - (intptr_t)(inst))) {		\
 		x86_jump_code((inst),(target));									\
 	} else {															\
 	    amd64_jump_membase ((inst), AMD64_RIP, 0);							\
-		*(unsigned long*)(inst) = (unsigned long)(target);							\
+		*(uintptr_t *)(inst) = (uintptr_t)(target);							\
 		(inst) += 8; \
 	} \
 } while (0)
@@ -917,7 +917,7 @@ do {     \
 #define emit_sse_reg_reg_op4(inst,dreg,reg,op1,op2,op3,op4) emit_sse_reg_reg_op4_size ((inst), (dreg), (reg), (op1), (op2), (op3), (op4), 0)
 
 /* specific SSE opcode defines */
- 
+
 #define amd64_sse_xorpd_reg_reg(inst,dreg,reg) emit_sse_reg_reg ((inst),(dreg),(reg), 0x66, 0x0f, 0x57)
 
 #define amd64_sse_xorpd_reg_membase(inst,dreg,basereg,disp) emit_sse_reg_membase ((inst),(dreg),(basereg), (disp), 0x66, 0x0f, 0x57)
@@ -1312,7 +1312,7 @@ do {     \
 //#define amd64_alu_reg_imm_size(inst,opc,reg,imm,size) do { amd64_emit_rex ((inst),(size),0,0,(reg)); x86_alu_reg_imm((inst),(opc),((reg)&0x7),(imm)); } while (0)
 #define amd64_alu_mem_imm_size(inst,opc,mem,imm,size) do { amd64_emit_rex ((inst),(size),0,0,0); x86_alu_mem_imm((inst),(opc),(mem),(imm)); } while (0)
 #define amd64_alu_membase_imm_size(inst,opc,basereg,disp,imm,size) do { amd64_emit_rex ((inst),(size),0,0,(basereg)); x86_alu_membase_imm((inst),(opc),((basereg)&0x7),(disp),(imm)); } while (0)
-#define amd64_alu_membase8_imm_size(inst,opc,basereg,disp,imm,size) do { amd64_emit_rex ((inst),(size),0,0,(basereg)); x86_alu_membase8_imm((inst),(opc),((basereg)&0x7),(disp),(imm)); } while (0)	
+#define amd64_alu_membase8_imm_size(inst,opc,basereg,disp,imm,size) do { amd64_emit_rex ((inst),(size),0,0,(basereg)); x86_alu_membase8_imm((inst),(opc),((basereg)&0x7),(disp),(imm)); } while (0)
 #define amd64_alu_mem_reg_size(inst,opc,mem,reg,size) do { amd64_emit_rex ((inst),(size),0,0,(reg)); x86_alu_mem_reg((inst),(opc),(mem),((reg)&0x7)); } while (0)
 #define amd64_alu_membase_reg_size(inst,opc,basereg,disp,reg,size) do { amd64_emit_rex ((inst),(size),(reg),0,(basereg)); x86_alu_membase_reg((inst),(opc),((basereg)&0x7),(disp),((reg)&0x7)); } while (0)
 //#define amd64_alu_reg_reg_size(inst,opc,dreg,reg,size) do { amd64_emit_rex ((inst),(size),(dreg),0,(reg)); x86_alu_reg_reg((inst),(opc),((dreg)&0x7),((reg)&0x7)); } while (0)
@@ -1608,7 +1608,7 @@ do {     \
 #define amd64_fucomi(inst,index) amd64_fucomi_size(inst,index,8)
 #define amd64_fucomip(inst,index) amd64_fucomip_size(inst,index,8)
 #define amd64_fld(inst,mem,is_double) amd64_fld_size(inst,mem,is_double,8)
-#define amd64_fld_membase(inst,basereg,disp,is_double)  amd64_fld_membase_size(inst,basereg,disp,is_double,8) 
+#define amd64_fld_membase(inst,basereg,disp,is_double)  amd64_fld_membase_size(inst,basereg,disp,is_double,8)
 #define amd64_fld80_mem(inst,mem) amd64_fld80_mem_size(inst,mem,8)
 #define amd64_fld80_membase(inst,basereg,disp) amd64_fld80_membase_size(inst,basereg,disp,8)
 #define amd64_fild(inst,mem,is_long) amd64_fild_size(inst,mem,is_long,8)

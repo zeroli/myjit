@@ -11,7 +11,7 @@ DEFINE_TEST(test1)
 {
 	plfl f1;
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), LOOP_CNT);
@@ -41,7 +41,7 @@ DEFINE_TEST(test2)
 {
 	plfl f1;
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), LOOP_CNT);
@@ -72,11 +72,11 @@ DEFINE_TEST(test10)
 {
 	plfl f1;
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), 123);
-	
+
 	jit_force_spill(p, R(0));
 	jit_force_spill(p, R(1));
 
@@ -97,11 +97,11 @@ DEFINE_TEST(test11)
 {
 	plfl f1;
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), 123);
-	
+
 	jit_force_spill(p, R(0));
 	jit_force_spill(p, R(1));
 
@@ -122,12 +122,12 @@ DEFINE_TEST(test12)
 {
 	plfl f1;
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_SIGNED_NUM, sizeof(intptr_t));
 
 	jit_getarg(p, R(0), 0);
 	jit_movi(p, R(1), 123);
 	jit_movi(p, R(2), 111);
-	
+
 	jit_force_spill(p, R(0));
 	jit_force_spill(p, R(1));
 
@@ -147,7 +147,7 @@ DEFINE_TEST(test12)
 
 	return 0;
 }
-	
+
 #endif
 
 DEFINE_TEST(test20)

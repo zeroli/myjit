@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -60,38 +60,38 @@ typedef struct jit_op {
         unsigned char spec;             // argument types, e.g REG+REG+IMM
         unsigned char arg_size;         // used by ld, st
         unsigned char assigned;
-        unsigned char fp;               // FP if it's a floating-point operation        
+        unsigned char fp;               // FP if it's a floating-point operation
 	unsigned char in_use;		// used be dead-code analyzer
         double flt_imm;                 // floating point immediate value
         jit_value arg[3];               // arguments passed by user
         jit_value r_arg[3];             // arguments transformed by register allocator
-        long patch_addr;
+        intptr_t patch_addr;
         struct jit_op * jmp_addr;
         struct jit_op * next;
         struct jit_op * prev;
         struct jit_set * live_in;
         struct jit_set * live_out;
-        struct jit_rmap * regmap;                // register mappings 
+        struct jit_rmap * regmap;                // register mappings
         int normalized_pos;             // number of operations from the end of the function
         struct jit_tree * allocator_hints; // reg. allocator to collect statistics on used registers
 	struct jit_debug_info *debug_info;
-	unsigned long code_offset;			// offset in the output buffer
-	unsigned long code_length;			// offset in the output buffer
+	uintptr_t  code_offset;			// offset in the output buffer
+	uintptr_t  code_length;			// offset in the output buffer
 	void *addendum;			// additional information
 } jit_op;
 
 typedef struct jit_label {
-        long pos;
+        intptr_t pos;
         jit_op * op;
         struct jit_label * next;
 } jit_label;
 
 typedef jit_value jit_reg;
 
-union jit_proc_value_alias {       
+union jit_proc_value_alias {
         void (*ptr)();
         jit_value num;
-}; 
+};
 
 #define JIT_PROC_VALUE(_f) jit_proc_value((void (*)(void)) (_f))
 static inline jit_value jit_proc_value(void (*f)(void))
@@ -143,7 +143,7 @@ typedef enum {
 	JIT_UREG	= (0x02 << 3),
 	JIT_LREG	= (0x03 << 3),
 	JIT_SYNCREG	= (0x04 << 3),
-	JIT_RENAMEREG	= (0x05 << 3), 
+	JIT_RENAMEREG	= (0x05 << 3),
 	JIT_FULL_SPILL	= (0x06 << 3),
 
 	JIT_PROLOG	= (0x10 << 3),
@@ -203,12 +203,12 @@ typedef enum {
 	JIT_BGE		= (0x73 << 3),
 	JIT_BEQ		= (0x74 << 3),
 	JIT_BNE		= (0x75 << 3),
-	JIT_BMS		= (0x76 << 3),	
-	JIT_BMC		= (0x77 << 3),	
-	JIT_BOADD	= (0x78 << 3),	
-	JIT_BOSUB	= (0x79 << 3),	
-	JIT_BNOADD	= (0x7a << 3),	
-	JIT_BNOSUB	= (0x7b << 3),	
+	JIT_BMS		= (0x76 << 3),
+	JIT_BMC		= (0x77 << 3),
+	JIT_BOADD	= (0x78 << 3),
+	JIT_BOSUB	= (0x79 << 3),
+	JIT_BNOADD	= (0x7a << 3),
+	JIT_BNOSUB	= (0x7b << 3),
 
 	JIT_FMOV	= (0x80 << 3),
 	JIT_FADD	= (0x81 << 3),
@@ -608,7 +608,7 @@ int jit_allocai(struct jit * jit, int size);
 #define jit_fretval(jit, a, b) jit_add_fop(jit, JIT_FRETVAL, SPEC(TREG, NO, NO), a, 0, 0, 0, b, jit_debug_info_new(__FILE__, __func__, __LINE__))
 
 /*
- * direct data and code emission 
+ * direct data and code emission
  */
 
 #define jit_ref_code(jit, a, b) jit_add_op(jit, JIT_REF_CODE, SPEC(TREG, IMM, NO), a, (jit_value)(b), 0, 0, jit_debug_info_new(__FILE__, __func__, __LINE__))
@@ -629,7 +629,7 @@ int jit_allocai(struct jit * jit, int size);
 #define jit_data_emptyarea(jit, count) \
 	do {  \
 		for (int i = 0; i < count; i++) jit_data_byte(jit, 0x00);\
-	} while(0) 
+	} while(0)
 
 static inline jit_op *jit_data_bytes(struct jit *jit, jit_value count, unsigned char *data)
 {

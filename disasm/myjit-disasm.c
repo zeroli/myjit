@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2015, 2017 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -27,7 +27,7 @@
 #include "sparc/sparc-dis.h"
 #include "arm32/arm32-dis.h"
 
-unsigned long global_addr;
+uintptr_t  global_addr;
 
 enum {
 	AMD64,
@@ -128,7 +128,7 @@ void disassm_arm32(unsigned char *buf, int len)
 	}
 }
 
-static void set_global_addr(unsigned long global_addr)
+static void set_global_addr(uintptr_t  global_addr)
 {
 	ud_set_pc(&dis_amd64, global_addr);
 	ud_set_pc(&dis_i386, global_addr);
@@ -149,17 +149,17 @@ void disassm_directive(unsigned char *buf)
 	else if (!strncmp(xbuf, ".addr=", 6)) {
 		global_addr = strtol(xbuf + 6, NULL, 16);
 		set_global_addr(global_addr);
-		if (sizeof(void *) == 8) printf("%016lx:\n", global_addr);
-		else printf("%016lx:\n", global_addr);
+		if (sizeof(void *) == 8) printf("%016llx:\n", global_addr);
+		else printf("%016llx:\n", global_addr);
 	}
 	else if (!strncmp(xbuf, "..addr=", 7)) {
 		global_addr = strtol(xbuf + 7, NULL, 16);
 		set_global_addr(global_addr);
 	} else if (!strcmp(xbuf, ".nl")) printf("\n");
 	else printf("Unknown directive: %s\n", buf);
-} 
+}
 
-int main() 
+int main()
 {
 	ud_init(&dis_i386);
 	ud_init(&dis_amd64);
@@ -191,7 +191,7 @@ int main()
 				}
 			}
 		}
-		input_clear();		
+		input_clear();
 	} while (input);
 	input_free();
 	return 0;

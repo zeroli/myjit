@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2017 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 typedef struct arm32d_t {
-	unsigned long pc;
+	uintptr_t  pc;
 	uint32_t *ibuf;
 	unsigned int ibuf_index;
 	unsigned int ibuf_size;
@@ -32,4 +32,4 @@ void arm32d_init(arm32d_t *);
 void arm32d_set_input_buffer(arm32d_t *, unsigned char *, int);
 int arm32d_disassemble(arm32d_t *);
 char *arm32d_insn_asm(arm32d_t *);
-void arm32d_set_pc(arm32d_t *, unsigned long);
+void arm32d_set_pc(arm32d_t *, uintptr_t );

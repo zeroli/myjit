@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -98,7 +98,7 @@
 
 /**
  * This function emits SSE code which assigns value value which resides in the memory
- * in to the XMM register If the value is not addressable with 32bit address, unused 
+ * in to the XMM register If the value is not addressable with 32bit address, unused
  * register from the register pool is used to access this value.
  */
 static void sse_mov_reg_safeimm(struct jit * jit, jit_op * op, jit_value reg, double * imm)
@@ -130,16 +130,16 @@ static void sse_alu_pd_reg_safeimm(struct jit * jit, jit_op * op, int op_id, int
 	if (((jit_unsigned_value)imm) > 0xffffffffUL) {
 		jit_hw_reg * r = jit_get_unused_reg(jit->reg_al, op, 0);
 		if (r) {
-			amd64_mov_reg_imm(jit->ip, r->id, (long)imm);
+			amd64_mov_reg_imm(jit->ip, r->id, (intptr_t)imm);
 			amd64_sse_alu_pd_reg_membase(jit->ip, op_id, reg, r->id, 0);
 		} else {
 			amd64_push_reg(jit->ip, AMD64_RAX);
-			amd64_mov_reg_imm(jit->ip, AMD64_RAX, (long)imm);
+			amd64_mov_reg_imm(jit->ip, AMD64_RAX, (intptr_t)imm);
 			amd64_sse_alu_pd_reg_membase(jit->ip, op_id, reg, AMD64_RAX, 0);
 			amd64_pop_reg(jit->ip, AMD64_RAX);
 		}
 	} else {
-		amd64_sse_alu_pd_reg_mem(jit->ip, op_id, reg, (long)imm);
+		amd64_sse_alu_pd_reg_mem(jit->ip, op_id, reg, (intptr_t)imm);
 	}
 }
 
@@ -154,16 +154,16 @@ static void sse_alu_sd_reg_safeimm(struct jit * jit, jit_op * op, int op_id, int
 	if (((jit_unsigned_value)imm) > 0xffffffffUL) {
 		jit_hw_reg * r = jit_get_unused_reg(jit->reg_al, op, 0);
 		if (r) {
-			amd64_mov_reg_imm(jit->ip, r->id, (long)imm);
+			amd64_mov_reg_imm(jit->ip, r->id, (intptr_t)imm);
 			amd64_sse_alu_sd_reg_membase(jit->ip, op_id, reg, r->id, 0);
 		} else {
 			amd64_push_reg(jit->ip, AMD64_RAX);
-			amd64_mov_reg_imm(jit->ip, AMD64_RAX, (long)imm);
+			amd64_mov_reg_imm(jit->ip, AMD64_RAX, (intptr_t)imm);
 			amd64_sse_alu_sd_reg_membase(jit->ip, op_id, reg, AMD64_RAX, 0);
 			amd64_pop_reg(jit->ip, AMD64_RAX);
 		}
 	} else {
-		amd64_sse_alu_sd_reg_mem(jit->ip, op_id, reg, (long)imm);
+		amd64_sse_alu_sd_reg_mem(jit->ip, op_id, reg, (intptr_t)imm);
 	}
 }
 
@@ -181,11 +181,11 @@ static unsigned char * emit_sse_get_sign_mask()
 	// gets 16-bytes aligned value
 	static unsigned char bufx[32];
 	unsigned char * buf = bufx + 1;
-	while ((long)buf % 16) buf++;
-	unsigned long long * bit_mask = (unsigned long long *)buf;
+	while ((intptr_t)buf % 16) buf++;
+	uintptr_t  * bit_mask = (uintptr_t  *)buf;
 
 	// inverts 64th (sing) bit
-	*bit_mask = (unsigned long long)1 << 63;
+	*bit_mask = (uintptr_t )1 << 63;
 	return buf;
 }
 
@@ -206,7 +206,7 @@ static void emit_sse_change_sign(struct jit * jit, jit_op * op, int reg)
 	sse_alu_pd_reg_safeimm(jit, op, X86_SSE_XOR, reg, (double *)emit_sse_get_sign_mask());
 }
 
-static void emit_sse_sub_op(struct jit * jit, jit_op * op, long a1, long a2, long a3)
+static void emit_sse_sub_op(struct jit * jit, jit_op * op, intptr_t a1, intptr_t a2, intptr_t a3)
 {
 	if (a1 == a2) {
 		sse_alu_sd_reg_reg(jit->ip, X86_SSE_SUB, a1, a3);
@@ -219,7 +219,7 @@ static void emit_sse_sub_op(struct jit * jit, jit_op * op, long a1, long a2, lon
 	}
 }
 
-static void emit_sse_div_op(struct jit * jit, long a1, long a2, long a3)
+static void emit_sse_div_op(struct jit * jit, intptr_t a1, intptr_t a2, intptr_t a3)
 {
 	if (a1 == a2) {
 		sse_alu_sd_reg_reg(jit->ip, X86_SSE_DIV, a1, a3);
@@ -229,23 +229,23 @@ static void emit_sse_div_op(struct jit * jit, long a1, long a2, long a3)
 
 		// divides a2 by a3 and moves to the results
 		sse_alu_sd_reg_reg(jit->ip, X86_SSE_DIV, a2, a3);
-		sse_movsd_reg_reg(jit->ip, a1, a2); 
+		sse_movsd_reg_reg(jit->ip, a1, a2);
 
 		// returns the the value of a2
 		x86_sse_alu_pd_reg_reg_imm(jit->ip, X86_SSE_SHUF, a2, a2, 1);
 	} else {
-		sse_movsd_reg_reg(jit->ip, a1, a2); 
+		sse_movsd_reg_reg(jit->ip, a1, a2);
 		sse_alu_sd_reg_reg(jit->ip, X86_SSE_DIV, a1, a3);
 	}
 }
 
-static void emit_sse_neg_op(struct jit * jit, jit_op * op, long a1, long a2)
+static void emit_sse_neg_op(struct jit * jit, jit_op * op, intptr_t a1, intptr_t a2)
 {
-	if (a1 != a2) sse_movsd_reg_reg(jit->ip, a1, a2); 
+	if (a1 != a2) sse_movsd_reg_reg(jit->ip, a1, a2);
 	emit_sse_change_sign(jit, op, a1);
 }
 
-static void emit_sse_branch(struct jit * jit, jit_op * op, long a1, long a2, long a3, int x86_cond)
+static void emit_sse_branch(struct jit * jit, jit_op * op, intptr_t a1, intptr_t a2, intptr_t a3, int x86_cond)
 {
         sse_alu_pd_reg_reg(jit->ip, X86_SSE_COMI, a2, a3);
         op->patch_addr = JIT_BUFFER_OFFSET(jit);
@@ -326,7 +326,7 @@ static void emit_sse_fst_op(struct jit * jit, jit_op * op, jit_value a1, jit_val
 
 		if (IS_IMM(op)) sse_movss_mem_reg(jit->ip, a1, a2);
 		else sse_movss_membase_reg(jit->ip, a1, 0, a2);
- 
+
 		if (live) sse_alu_pd_reg_reg_imm(jit->ip, X86_SSE_SHUF, a2, a2, 1);
 
 	} else {

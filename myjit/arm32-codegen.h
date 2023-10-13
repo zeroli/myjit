@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -241,7 +241,7 @@ static inline int arm32_encode_imm(int x)
 	| B(16, _rn)\
 	| B(12, _rd)\
 	| B(0,  ((_op2) & 0xfff)))
-	
+
 #define arm32_encode_branch(ins, _cond, _link, _offset) arm32_emit(ins, \
 	  B(28, _cond) \
 	| B(25, 0x5)   \
@@ -268,9 +268,9 @@ static inline int arm32_encode_imm(int x)
 
 #define arm32_patch(target, pos) \
 	do { \
-		long __p =  ((long)(pos)) >> 2; \
-		long __t =  ((long)(target)) >> 2; \
-		long __location = (__p - __t - 2); \
+		intptr_t __p =  ((intptr_t)(pos)) >> 2; \
+		intptr_t __t =  ((intptr_t)(target)) >> 2; \
+		intptr_t __location = (__p - __t - 2); \
 			*(int *)(target) &= ~(0xffffff); /* 24 bits */\
 			*(int *)(target) |= (0xffffff & __location); /* 24 bits */\
 	} while (0)
@@ -318,7 +318,7 @@ static inline int arm32_encode_imm(int x)
 		arm32_cond_movw_reg_imm16(ins, ARMCOND_AL, _rd, __imm & 0xffff); \
 		arm32_cond_movt_reg_imm16(ins, ARMCOND_AL, _rd, __imm >> 16 & 0xffff); \
 	} while (0)
-	
+
 #define arm32_alu_reg_reg(ins, _opcode, _rd, _rn, _rm) \
 	arm32_encode_dataop(ins, ARMCOND_AL, 0, _opcode, 0, _rd, _rn, _rm)
 
@@ -436,7 +436,7 @@ static inline int arm32_encode_imm(int x)
 			} else { abort(); } \
 		} \
 		arm32_emit(ins, op);\
-	} while (0) 
+	} while (0)
 
 #define arm32_ld_reg(ins, rd, rn, rm) \
 	arm32_single_data_transfer(ins, ARMCOND_AL, 1, 1, 0, rd, rn, rm)
@@ -572,7 +572,7 @@ arm32_emit(ins, \
 
 #define arm32_stack_op(ins, _opcode, _imm) \
 	arm32_alu_reg_imm(ins, _opcode, ARMREG_SP, ARMREG_SP, _imm);
-	
+
 #define arm32_add_sp_imm(ins, imm)\
 	arm32_stack_op(ins, ARMOP_ADD, (imm))
 

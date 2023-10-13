@@ -64,7 +64,7 @@ char *test_filename;
 
 #define ASSERT_EQ(_expected, _actual) { \
 	if ((_expected) != (_actual))  {\
-		fprintf(stderr, "%s: %s at line %i (expected: %li, actual: %li)\n", test_filename, test_name, __LINE__, (jit_value)(_expected), (jit_value)(_actual)); \
+		fprintf(stderr, "%s: %s at line %i (expected: %lli, actual: %lli)\n", test_filename, test_name, __LINE__, (jit_value)(_expected), (jit_value)(_actual)); \
 		return 1; \
 	} \
 }
@@ -96,7 +96,7 @@ static inline int equals(double x, double y, double tolerance)
 void test_setup();
 
 int run_test(int id, int options)
-{       
+{
 	struct jit *p = jit_init();
 	int result = test_cases[id](p, test_names[id], options);
 	jit_free(p);
@@ -104,7 +104,7 @@ int run_test(int id, int options)
 }
 
 void report_results_and_quit(int successful, int ignored, int total)
-{       
+{
 	total -= ignored;
 	int ok = (total == successful);
 	if (ok) printf(" \033[1;32mOK\033[0m ");
@@ -114,8 +114,8 @@ void report_results_and_quit(int successful, int ignored, int total)
 }
 
 int main(int argc, char **argv)
-{       
-	int options = 0; 
+{
+	int options = 0;
 	int successful = 0;
 	int ignored = 0;
 	if (argc == 1) options |= OPT_ALL;

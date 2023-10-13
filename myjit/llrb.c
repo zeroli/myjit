@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -161,7 +161,7 @@ static inline jit_tree_key node_min(jit_tree * x)
 }
 
 static jit_tree * delete_min(jit_tree * h)
-{ 
+{
 	if (h->left == NULL) {
 		JIT_FREE(h);
 		return NULL;
@@ -178,7 +178,7 @@ static jit_tree * delete_min(jit_tree * h)
 static jit_tree * delete_node(jit_tree * h, jit_tree_key key, int * found)
 {
 	if (h == NULL) {
-		if (found) *found = 0; 
+		if (found) *found = 0;
 		return NULL;
 	}
 
@@ -209,7 +209,7 @@ static jit_tree * delete_node(jit_tree * h, jit_tree_key key, int * found)
 }
 
 static inline jit_tree * jit_tree_delete(jit_tree * root, jit_tree_key key, int * found)
-{ 
+{
 	root = delete_node(root, key, found);
 	if (root) root->color = BLACK;
 	return root;
@@ -248,7 +248,7 @@ static inline void jit_print_tree(jit_tree * h, int level)
 	for (int i = 0; i < level; i++)
 		printf(" ");
 
-	printf("%i:%li\n", (int)h->key, (long)h->value);
+	printf("%i:%lli\n", (int)h->key, (intptr_t)h->value);
 	jit_print_tree(h->left, level + 1);
 	jit_print_tree(h->right, level + 1);
 }

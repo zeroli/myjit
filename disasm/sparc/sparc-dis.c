@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -110,9 +110,9 @@ static void spd_out_name(spd_t *dis, char *opname)
 
 static void spd_out_addr(spd_t *dis, int addr)
 {
-	spd_out_printf(dis->out, "%x <pc %s %i>", 
+	spd_out_printf(dis->out, "%x <pc %s %i>",
 			dis->pc + addr,
-			addr < 0 ? "-" : "+", 
+			addr < 0 ? "-" : "+",
 			ABS(addr));
 }
 
@@ -125,8 +125,8 @@ static void spd_out_reg(spd_t *dis, int reg)
 {
 	static char *regs[] = {
 		"g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-		"o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7", 
-		"l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", 
+		"o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
+		"l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
 		"i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7"
 	};
 
@@ -198,7 +198,7 @@ static void decode_format1(spd_t *dis, uint32_t insn)
 {
 	spd_out_name(dis, "call");
 	spd_out_addr(dis, sparc_inst_imm30(insn) << 2);
-} 
+}
 
 static void decode_format2(spd_t *dis, uint32_t insn)
 {
@@ -214,20 +214,20 @@ static void decode_format2(spd_t *dis, uint32_t insn)
 	int imm22 = sparc_inst_imm22(insn);
 	if (op2 == 0x04) {
 		if (rd) {
-			spd_out_name(dis, "sethi "); 
+			spd_out_name(dis, "sethi ");
 			spd_out_printf(dis->out, "%%hi(0x%x)", imm22 << 10);
 			spd_out_comma(dis);
 			spd_out_reg(dis, rd);
 		} else {
-			spd_out_name(dis, "nop"); 
+			spd_out_name(dis, "nop");
 		}
 		return;
 	}
 
 	if ((op2 == 0x02) || (op2 == 0x06)) {
 
-		if (op2 == 0x02) spd_out_name(dis, bops[sparc_inst_cond(insn)]); 
-		if (op2 == 0x06) spd_out_name(dis, bfops[sparc_inst_cond(insn)]); 
+		if (op2 == 0x02) spd_out_name(dis, bops[sparc_inst_cond(insn)]);
+		if (op2 == 0x06) spd_out_name(dis, bfops[sparc_inst_cond(insn)]);
 
 		if (sparc_inst_a(insn)) strcat(dis->out + strlen(dis->out) - 1, ",a ");
 		spd_out_addr(dis, sign_ext(22, imm22) * 4);
@@ -273,8 +273,8 @@ static int decode_synthetic_3_10(spd_t *dis, int op3, int is_imm, int rd, int rs
 {
 	if ((op3 == 0x14 /* subcc */) && (rd == SPARC_G0)) { OPNAME("cmp") REG(rs1) COMMA REG_OR_SIMM13; return 1; }
 	if ((op3 == 0x12 /* orcc */) && !is_imm && (rd == SPARC_G0) && (rs1 == SPARC_G0)) { OPNAME("tst"); REG(rs2); return 1; }
-	if ((op3 == 0x07 /* xnor */) && !is_imm && (rs2 == SPARC_G0)) { 
-		OPNAME("not"); 
+	if ((op3 == 0x07 /* xnor */) && !is_imm && (rs2 == SPARC_G0)) {
+		OPNAME("not");
 		if (rs1 != rd) { REG(rs1) COMMA };
 		REG(rd);
 		return 1;
@@ -290,7 +290,7 @@ static int decode_synthetic_3_10(spd_t *dis, int op3, int is_imm, int rd, int rs
 
 	if ((op3 == 0x02 /* or */) && !is_imm && (rs1 == SPARC_G0) && (rs2 == SPARC_G0)) { OPNAME("clr") REG(rd); return 1; };
 	if ((op3 == 0x02 /* or */) && (rs1 == SPARC_G0)) { OPNAME("mov") REG_OR_SIMM13 COMMA REG(rd); return 1; };
-		
+
 	if ((rs1 == rd) && (is_imm))  {
 		int match = 0;
 		switch (op3) {
@@ -320,29 +320,29 @@ static int decode_synthetic_3_10(spd_t *dis, int op3, int is_imm, int rd, int rs
 			if (rs1 == SPARC_I7) { OPNAME("ret"); return 1; }
 			if (rs1 == SPARC_O7) { OPNAME("retl"); return 1; }
 		}
-		OPNAME("jmp"); INDIRECT_ADDR13; 
+		OPNAME("jmp"); INDIRECT_ADDR13;
 		return 1;
 	}
 
 	if ((op3 == 0x38 /* jmpl */) && (rd == SPARC_O7)) { OPNAME("call"); INDIRECT_ADDR13; return 1; }
 
 
-	if ((op3 == 0x28 /* rd */) && (rs1 == SPARC_G0)) { 
+	if ((op3 == 0x28 /* rd */) && (rs1 == SPARC_G0)) {
 		OPNAME("rd");
 		strcat(dis->out, "%y");
 		COMMA;
 		REG(rd);
-		return 1; 
+		return 1;
 	}
 
-	if ((op3 == 0x30 /* wr */) && (rd == SPARC_G0)) { 
+	if ((op3 == 0x30 /* wr */) && (rd == SPARC_G0)) {
 		OPNAME("wr");
 		REG(rs1);
 		COMMA;
 		REG_OR_IMM13;
 		COMMA;
 		strcat(dis->out, "%y");
-		return 1; 
+		return 1;
 	}
 
 
@@ -361,20 +361,20 @@ DEFINE_FORMAT(fmt_fop2)		{ NAME FREG(rs2) COMMA FREG(rd) }
 DEFINE_FORMAT(fmt_fop3)		{ NAME FREG(rs1) COMMA FREG(rs2) COMMA FREG(rd) }
 
 static format3 opcodes_3_11[] = {
-	{ .opc = 0x00, .print_fn = fmt_load, .op_name = "ld" }, 
-	{ .opc = 0x01, .print_fn = fmt_load, .op_name = "ldub" }, 
-	{ .opc = 0x02, .print_fn = fmt_load, .op_name = "lduh" }, 
-	{ .opc = 0x03, .print_fn = fmt_load, .op_name = "ldd" }, 
-	{ .opc = 0x09, .print_fn = fmt_load, .op_name = "ldsb" }, 
-	{ .opc = 0x0a, .print_fn = fmt_load, .op_name = "ldsh" }, 
-	{ .opc = 0x04, .print_fn = fmt_store, .op_name = "st" }, 
-	{ .opc = 0x05, .print_fn = fmt_store, .op_name = "stb" }, 
-	{ .opc = 0x06, .print_fn = fmt_store, .op_name = "sth" }, 
-	{ .opc = 0x07, .print_fn = fmt_store, .op_name = "std" }, 
-	{ .opc = 0x20, .print_fn = fmt_load_float, .op_name = "ldf" }, 
-	{ .opc = 0x23, .print_fn = fmt_load_float, .op_name = "lddf" }, 
-	{ .opc = 0x24, .print_fn = fmt_store_float, .op_name = "stf" }, 
-	{ .opc = 0x27, .print_fn = fmt_store_float, .op_name = "stdf" }, 
+	{ .opc = 0x00, .print_fn = fmt_load, .op_name = "ld" },
+	{ .opc = 0x01, .print_fn = fmt_load, .op_name = "ldub" },
+	{ .opc = 0x02, .print_fn = fmt_load, .op_name = "lduh" },
+	{ .opc = 0x03, .print_fn = fmt_load, .op_name = "ldd" },
+	{ .opc = 0x09, .print_fn = fmt_load, .op_name = "ldsb" },
+	{ .opc = 0x0a, .print_fn = fmt_load, .op_name = "ldsh" },
+	{ .opc = 0x04, .print_fn = fmt_store, .op_name = "st" },
+	{ .opc = 0x05, .print_fn = fmt_store, .op_name = "stb" },
+	{ .opc = 0x06, .print_fn = fmt_store, .op_name = "sth" },
+	{ .opc = 0x07, .print_fn = fmt_store, .op_name = "std" },
+	{ .opc = 0x20, .print_fn = fmt_load_float, .op_name = "ldf" },
+	{ .opc = 0x23, .print_fn = fmt_load_float, .op_name = "lddf" },
+	{ .opc = 0x24, .print_fn = fmt_store_float, .op_name = "stf" },
+	{ .opc = 0x27, .print_fn = fmt_store_float, .op_name = "stdf" },
 };
 
 static format3 opcodes_3_10[] = {
@@ -421,49 +421,49 @@ static format3 opcodes_3_10[] = {
 
 static format3 opcodes_3fop[] = {
         /* fop1 format */
-	{ .opc = 196, .print_fn = fmt_fop2, .op_name = "fitos" }, 
-	{ .opc = 200, .print_fn = fmt_fop2, .op_name = "fitod" }, 
-	{ .opc = 204, .print_fn = fmt_fop2, .op_name = "fitoq" }, 
-	{ .opc = 132, .print_fn = fmt_fop2, .op_name = "fxtos" }, 
-	{ .opc = 136, .print_fn = fmt_fop2, .op_name = "fxtod" }, 
-	{ .opc = 140, .print_fn = fmt_fop2, .op_name = "fxtoq" }, 
-	{ .opc = 209, .print_fn = fmt_fop2, .op_name = "fstoi" }, 
-	{ .opc = 210, .print_fn = fmt_fop2, .op_name = "fdtoi" }, 
-	{ .opc = 211, .print_fn = fmt_fop2, .op_name = "fqtoi" }, 
-	{ .opc = 201, .print_fn = fmt_fop2, .op_name = "fstod" }, 
-	{ .opc = 205, .print_fn = fmt_fop2, .op_name = "fstoq" }, 
-	{ .opc = 198, .print_fn = fmt_fop2, .op_name = "fdtos" }, 
-	{ .opc = 206, .print_fn = fmt_fop2, .op_name = "fdtoq" }, 
-	{ .opc = 199, .print_fn = fmt_fop2, .op_name = "fqtos" }, 
-	{ .opc = 203, .print_fn = fmt_fop2, .op_name = "fqtod" }, 
-	{ .opc = 1, .print_fn = fmt_fop2,   .op_name = "fmovs" }, 
-	{ .opc = 2, .print_fn = fmt_fop2,   .op_name = "fmovd" }, 
-	{ .opc = 5, .print_fn = fmt_fop2,   .op_name = "fnegs" }, 
-	{ .opc = 6, .print_fn = fmt_fop2,   .op_name = "fnegd" }, 
-	{ .opc = 9, .print_fn = fmt_fop2,   .op_name = "fabss" }, 
-	{ .opc = 10, .print_fn = fmt_fop2,  .op_name = "fabsd" }, 
+	{ .opc = 196, .print_fn = fmt_fop2, .op_name = "fitos" },
+	{ .opc = 200, .print_fn = fmt_fop2, .op_name = "fitod" },
+	{ .opc = 204, .print_fn = fmt_fop2, .op_name = "fitoq" },
+	{ .opc = 132, .print_fn = fmt_fop2, .op_name = "fxtos" },
+	{ .opc = 136, .print_fn = fmt_fop2, .op_name = "fxtod" },
+	{ .opc = 140, .print_fn = fmt_fop2, .op_name = "fxtoq" },
+	{ .opc = 209, .print_fn = fmt_fop2, .op_name = "fstoi" },
+	{ .opc = 210, .print_fn = fmt_fop2, .op_name = "fdtoi" },
+	{ .opc = 211, .print_fn = fmt_fop2, .op_name = "fqtoi" },
+	{ .opc = 201, .print_fn = fmt_fop2, .op_name = "fstod" },
+	{ .opc = 205, .print_fn = fmt_fop2, .op_name = "fstoq" },
+	{ .opc = 198, .print_fn = fmt_fop2, .op_name = "fdtos" },
+	{ .opc = 206, .print_fn = fmt_fop2, .op_name = "fdtoq" },
+	{ .opc = 199, .print_fn = fmt_fop2, .op_name = "fqtos" },
+	{ .opc = 203, .print_fn = fmt_fop2, .op_name = "fqtod" },
+	{ .opc = 1, .print_fn = fmt_fop2,   .op_name = "fmovs" },
+	{ .opc = 2, .print_fn = fmt_fop2,   .op_name = "fmovd" },
+	{ .opc = 5, .print_fn = fmt_fop2,   .op_name = "fnegs" },
+	{ .opc = 6, .print_fn = fmt_fop2,   .op_name = "fnegd" },
+	{ .opc = 9, .print_fn = fmt_fop2,   .op_name = "fabss" },
+	{ .opc = 10, .print_fn = fmt_fop2,  .op_name = "fabsd" },
 	{ .opc = 41, .print_fn = fmt_fop2,  .op_name = "fsqrts" },
 	{ .opc = 42, .print_fn = fmt_fop2,  .op_name = "fsqrtd" },
 	{ .opc = 43, .print_fn = fmt_fop2,  .op_name = "fsqrtq" },
-	{ .opc = 65, .print_fn = fmt_fop3,  .op_name = "fadds" }, 
-	{ .opc = 66, .print_fn = fmt_fop3,  .op_name = "faddd" }, 
-	{ .opc = 67, .print_fn = fmt_fop3,  .op_name = "faddq" }, 
-	{ .opc = 69, .print_fn = fmt_fop3,  .op_name = "fsubs" }, 
-	{ .opc = 70, .print_fn = fmt_fop3,  .op_name = "fsubd" }, 
-	{ .opc = 71, .print_fn = fmt_fop3,  .op_name = "fsubq" }, 
-	{ .opc = 73, .print_fn = fmt_fop3,  .op_name = "fmuls" }, 
-	{ .opc = 74, .print_fn = fmt_fop3,  .op_name = "fmuld" }, 
-	{ .opc = 75, .print_fn = fmt_fop3,  .op_name = "fmulq" }, 
+	{ .opc = 65, .print_fn = fmt_fop3,  .op_name = "fadds" },
+	{ .opc = 66, .print_fn = fmt_fop3,  .op_name = "faddd" },
+	{ .opc = 67, .print_fn = fmt_fop3,  .op_name = "faddq" },
+	{ .opc = 69, .print_fn = fmt_fop3,  .op_name = "fsubs" },
+	{ .opc = 70, .print_fn = fmt_fop3,  .op_name = "fsubd" },
+	{ .opc = 71, .print_fn = fmt_fop3,  .op_name = "fsubq" },
+	{ .opc = 73, .print_fn = fmt_fop3,  .op_name = "fmuls" },
+	{ .opc = 74, .print_fn = fmt_fop3,  .op_name = "fmuld" },
+	{ .opc = 75, .print_fn = fmt_fop3,  .op_name = "fmulq" },
 	{ .opc = 105, .print_fn = fmt_fop3, .op_name = "fsmuld" },
 	{ .opc = 111, .print_fn = fmt_fop3, .op_name = "fdmulq" },
-	{ .opc = 77, .print_fn = fmt_fop3,  .op_name = "fdivs" }, 
-	{ .opc = 78, .print_fn = fmt_fop3,  .op_name = "fdivd" }, 
-	{ .opc = 79, .print_fn = fmt_fop3,  .op_name = "fdivq" }, 
+	{ .opc = 77, .print_fn = fmt_fop3,  .op_name = "fdivs" },
+	{ .opc = 78, .print_fn = fmt_fop3,  .op_name = "fdivd" },
+	{ .opc = 79, .print_fn = fmt_fop3,  .op_name = "fdivq" },
 
 	/* fop2 format */
-	{ .opc = 81, .print_fn = fmt_fcmp,  .op_name = "fcmps" }, 
-	{ .opc = 82, .print_fn = fmt_fcmp,  .op_name = "fcmpd" }, 
-	{ .opc = 83, .print_fn = fmt_fcmp,  .op_name = "fcmpq" }, 
+	{ .opc = 81, .print_fn = fmt_fcmp,  .op_name = "fcmps" },
+	{ .opc = 82, .print_fn = fmt_fcmp,  .op_name = "fcmpd" },
+	{ .opc = 83, .print_fn = fmt_fcmp,  .op_name = "fcmpq" },
 	{ .opc = 85, .print_fn = fmt_fcmp,  .op_name = "fcmpes" },
 	{ .opc = 86, .print_fn = fmt_fcmp,  .op_name = "fcmped" },
 	{ .opc = 87, .print_fn = fmt_fcmp,  .op_name = "fcmpeq" },
@@ -476,7 +476,7 @@ static void decode_format3(spd_t *dis, uint32_t insn)
 	int rs2 = sparc_inst_rs2(insn);
 	int op3 = sparc_inst_op3(insn);
 	int is_imm = sparc_inst_i(insn);
-	int imm13 = sparc_inst_imm13(insn); 
+	int imm13 = sparc_inst_imm13(insn);
 	int simm13 = sign_ext(13, imm13);
 
 	format3 *op_table;
@@ -562,7 +562,7 @@ char *spd_insn_asm(spd_t *dis)
 	return dis->out;
 }
 
-void spd_set_pc(spd_t *dis, unsigned long pc)
+void spd_set_pc(spd_t *dis, uintptr_t  pc)
 {
 	dis->pc = pc;
 }

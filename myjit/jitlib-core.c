@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/mman.h>
+#include "mman-win32/mman.h"
 #include <unistd.h>
 
 #include "cpu-detect.h"
@@ -57,7 +57,7 @@
 #define BUF_SIZE		(4096)
 #define MINIMAL_BUF_SPACE	(1024)
 
-struct jit_op * jit_add_op(struct jit * jit, unsigned short code, unsigned char spec, long arg1, long arg2, long arg3, unsigned char arg_size, struct jit_debug_info *debug_info)
+struct jit_op * jit_add_op(struct jit * jit, unsigned short code, unsigned char spec, intptr_t arg1, intptr_t arg2, intptr_t arg3, unsigned char arg_size, struct jit_debug_info *debug_info)
 {
 	struct jit_op * r = jit_op_new(code, spec, arg1, arg2, arg3, arg_size);
 	r->debug_info = debug_info;
@@ -67,7 +67,7 @@ struct jit_op * jit_add_op(struct jit * jit, unsigned short code, unsigned char 
 	return r;
 }
 
-struct jit_op * jit_add_fop(struct jit * jit, unsigned short code, unsigned char spec, long arg1, long arg2, long arg3, double flt_imm, unsigned char arg_size, struct jit_debug_info *debug_info)
+struct jit_op * jit_add_fop(struct jit * jit, unsigned short code, unsigned char spec, intptr_t arg1, intptr_t arg2, intptr_t arg3, double flt_imm, unsigned char arg_size, struct jit_debug_info *debug_info)
 {
 	struct jit_op * r = jit_add_op(jit, code, spec, arg1, arg2, arg3, arg_size, debug_info);
 	r->fp = 1;
@@ -105,9 +105,9 @@ struct jit * jit_init()
 
 jit_op *jit_add_prolog(struct jit * jit, void * func, struct jit_debug_info *debug_info)
 {
-        jit_op * op = jit_add_op(jit, JIT_PROLOG , SPEC(IMM, NO, NO), (long)func, 0, 0, 0, NULL);
+        jit_op * op = jit_add_op(jit, JIT_PROLOG , SPEC(IMM, NO, NO), (intptr_t)func, 0, 0, 0, NULL);
         struct jit_func_info * info = JIT_MALLOC(sizeof(struct jit_func_info));
-        op->arg[1] = (long)info;
+        op->arg[1] = (intptr_t)info;
 	op->debug_info = debug_info;
 
         jit->current_func = op;
@@ -122,7 +122,7 @@ jit_op *jit_add_prolog(struct jit * jit, void * func, struct jit_debug_info *deb
 jit_label * jit_get_label(struct jit * jit)
 {
         jit_label * r = JIT_MALLOC(sizeof(jit_label));
-        jit_add_op(jit, JIT_LABEL, SPEC(IMM, NO, NO), (long)r, 0, 0, 0, NULL);
+        jit_add_op(jit, JIT_LABEL, SPEC(IMM, NO, NO), (intptr_t)r, 0, 0, 0, NULL);
         r->next = jit->labels;
         jit->labels = r;
         return r;
@@ -133,11 +133,11 @@ jit_label * jit_get_label(struct jit * jit)
 /**
  * returns 1 if the immediate value has to be transformed into register
  */
-static int jit_imm_overflow(struct jit *jit, jit_op *op, long value)
+static int jit_imm_overflow(struct jit *jit, jit_op *op, intptr_t value)
 {
 #ifndef JIT_ARCH_ARM32
-	unsigned long mask = ~((1UL << JIT_IMM_BITS) - 1);
-	unsigned long high_bits = value & mask;
+	uintptr_t  mask = ~((1UL << JIT_IMM_BITS) - 1);
+	uintptr_t  high_bits = value & mask;
 
 	if (IS_SIGNED(op)) {
 		if ((high_bits != 0) && (high_bits != mask)) return 1;
@@ -146,7 +146,7 @@ static int jit_imm_overflow(struct jit *jit, jit_op *op, long value)
 	}
 	return 0;
 #else
-	long abs_value = (value < 0 ? - value : value);
+	intptr_t abs_value = (value < 0 ? - value : value);
 	if (GET_OP(op) == JIT_HMUL) return 1;
 	if (GET_OP(op) == JIT_SUBC) return 1;
 	if (op->code == (JIT_LD | IMM | SIGNED)) return 1;
@@ -210,7 +210,7 @@ static void jit_correct_long_imms(struct jit * jit)
 		int imm_arg;
 		for (int i = 1; i < 4; i++)
 			if (ARG_TYPE(op, i) == IMM) imm_arg = i - 1;
-		long value = op->arg[imm_arg];
+		intptr_t value = op->arg[imm_arg];
 
 		if (jit_imm_overflow(jit, op, value)) {
 			jit_op * newop = jit_op_new(JIT_MOV | IMM, SPEC(TREG, IMM, NO), R_IMM, value, 0, REG_SIZE);
@@ -300,7 +300,7 @@ static inline void jit_prepare_reg_counts(struct jit * jit)
 
 #if defined(JIT_ARCH_AMD64)
 				// stack has to be aligned to 16 bytes
-				while ((info->gp_reg_count + info->fp_reg_count) % 2) info->gp_reg_count ++; 
+				while ((info->gp_reg_count + info->fp_reg_count) % 2) info->gp_reg_count ++;
 #endif
 				info->args = JIT_MALLOC(sizeof(struct jit_inp_arg) * declared_args);
 			}
@@ -314,14 +314,14 @@ static inline void jit_prepare_reg_counts(struct jit * jit)
 			}
 			if (!op) break;
 		}
-	
+
 		for (int i = 0; i < 3; i++)
 			if ((ARG_TYPE(op, i + 1) == TREG) || (ARG_TYPE(op, i + 1) == REG)) {
 				jit_reg r = (jit_reg) op->arg[i];
 				if ((JIT_REG_TYPE(r) == JIT_RTYPE_INT) && (JIT_REG_ID(r) > last_gp)) last_gp = JIT_REG_ID(r);
 				if ((JIT_REG_TYPE(r) == JIT_RTYPE_FLOAT) && (JIT_REG_ID(r) > last_fp)) last_fp = JIT_REG_ID(r);
 			}
-				
+
 		if (GET_OP(op) == JIT_DECL_ARG) {
 			declared_args++;
 			if (op->arg[0] == JIT_FLOAT_NUM) fp_args++;
@@ -399,7 +399,7 @@ static inline void jit_prepare_spills_on_jmpr_targets(struct jit *jit)
 
 static inline void jit_buf_expand(struct jit * jit)
 {
-	long pos = jit->ip - jit->buf;
+	intptr_t pos = jit->ip - jit->buf;
 	jit->buf_capacity *= 2;
 	jit->buf = JIT_REALLOC(jit->buf, jit->buf_capacity);
 	jit->ip = jit->buf + pos;
@@ -450,24 +450,24 @@ void jit_generate_code(struct jit * jit)
 	for (struct jit_op * op = jit->ops; op != NULL; op = op->next) {
 		if (jit->buf_capacity - (jit->ip - jit->buf) < MINIMAL_BUF_SPACE) jit_buf_expand(jit);
 		// platform unspecific opcodes
-		unsigned long offset_1 = (jit->ip - jit->buf);
+		uintptr_t  offset_1 = (jit->ip - jit->buf);
 		switch (GET_OP(op)) {
 			case JIT_DATA_BYTE: *(jit->ip)++ = (unsigned char) op->arg[0]; break;
-			case JIT_DATA_BYTES: 
+			case JIT_DATA_BYTES:
 				while (jit->buf_capacity - (jit->ip - jit->buf) < op->arg[0])
 					jit_buf_expand(jit);
-				
+
 				for (int i = 0; i < op->arg[0]; i++)
 					*(jit->ip)++ = *(((unsigned char *) op->addendum) + i);
 				break;
-			case JIT_DATA_REF_CODE: 
-			case JIT_DATA_REF_DATA: 
+			case JIT_DATA_REF_CODE:
+			case JIT_DATA_REF_DATA:
 				op->patch_addr = JIT_BUFFER_OFFSET(jit);
 				for (int i = 0; i < sizeof(void *); i++) {
 					*jit->ip = 0;
 					jit->ip++;
 				}
-				break; 
+				break;
 			case JIT_FORCE_SPILL:
 			case JIT_FORCE_ASSOC:
 			case JIT_COMMENT:
@@ -477,13 +477,13 @@ void jit_generate_code(struct jit * jit)
 			// platform specific opcodes
 			default: jit_gen_op(jit, op);
 		}
-		unsigned long offset_2 = (jit->ip - jit->buf);
+		uintptr_t  offset_2 = (jit->ip - jit->buf);
 		op->code_offset = offset_1;
 		op->code_length = offset_2 - offset_1;
 	}
 
 	/* moves the code to its final destination */
-	int code_size = jit->ip - jit->buf;  
+	int code_size = jit->ip - jit->buf;
 	//void * mem;
 	//posix_memalign(&mem, sysconf(_SC_PAGE_SIZE), code_size);
 	//mprotect(mem, code_size, PROT_READ | PROT_EXEC | PROT_WRITE);
@@ -493,7 +493,7 @@ void jit_generate_code(struct jit * jit)
 	JIT_FREE(jit->buf);
 
 	// FIXME: duplicitni vypocet?
-	long pos = jit->ip - jit->buf;
+	intptr_t pos = jit->ip - jit->buf;
 	jit->buf = mem;
 	jit->ip = jit->buf + pos;
 	jit->mmaped_buf = 1;
@@ -504,7 +504,7 @@ void jit_generate_code(struct jit * jit)
 	/* assigns functions */
 	for (jit_op * op = jit_op_first(jit->ops); op != NULL; op = op->next) {
 		if (GET_OP(op) == JIT_PROLOG)
-			*(void **)(op->arg[0]) = jit->buf + (long)op->patch_addr;
+			*(void **)(op->arg[0]) = jit->buf + (intptr_t)op->patch_addr;
 	}
 }
 

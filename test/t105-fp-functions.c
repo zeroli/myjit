@@ -7,7 +7,7 @@ typedef float (*pffdui)(double, unsigned int);
 typedef double (*pdfuc)(unsigned char);
 typedef double (*pdfpcus)(char *, unsigned short);
 
-// function which computes an average of three numbers  
+// function which computes an average of three numbers
 DEFINE_TEST(test1)
 {
 	pdfdfd f1;
@@ -47,7 +47,7 @@ DEFINE_TEST(test2)
 	jit_subi(p, R(1), R(1), 1);
 	jit_jmpi(p, loop);
 
-	jit_patch(p, end);	
+	jit_patch(p, end);
 	jit_fretr(p, FR(2), sizeof(float));
 	JIT_GENERATE_CODE(p);
 
@@ -131,10 +131,10 @@ DEFINE_TEST(test4)
 // function which converts string to number
 DEFINE_TEST(test5)
 {
-	pdfpcus f1; // string, radix -> long 
+	pdfpcus f1; // string, radix -> long
 
 	jit_prolog(p, &f1);
-	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(long));
+	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(intptr_t));
 	jit_declare_arg(p, JIT_UNSIGNED_NUM, sizeof(short));
 
 	// R(0): string
@@ -203,11 +203,11 @@ DEFINE_TEST(test6)
 	static char *str = "Hello, World! Lucky number for today is %.3f!!!\n";
         static char buf[120];
 
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 	jit_movi(p, R(0), str);
-	
+
 	jit_fmovi(p, FR(1), 12345.678);
 
 	jit_movi(p, R(2), SPRINTF);
@@ -237,14 +237,14 @@ DEFINE_TEST(test7)
 
 	simple_buffer(BUFFER_CLEAR, NULL);
 
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 	int arr = jit_allocai(p, ARR_SIZE  * sizeof(double)); // allocates an array
 
 	jit_fmovi(p, FR(0), 1);			// sets up the first element
-	jit_fstxi(p, arr, R_FP, FR(0), sizeof(double));	
-	
+	jit_fstxi(p, arr, R_FP, FR(0), sizeof(double));
+
 	jit_addi(p, R(0), R_FP, arr);			// pointer to the array
 	jit_addi(p, R(1), R(0), sizeof(double));	// position in the array (2nd element)
 	jit_movi(p, R(2), ARR_SIZE - 1);		// counter
@@ -259,7 +259,7 @@ DEFINE_TEST(test7)
 	jit_subi(p, R(2), R(2), 1);
 	jit_bgti(p, loop, R(2), 0);
 
-	jit_movi(p, R(2), ARR_SIZE - 1);		
+	jit_movi(p, R(2), ARR_SIZE - 1);
 
 	jit_label * loop2 = jit_get_label(p);
 
@@ -305,11 +305,11 @@ DEFINE_TEST(test8)
 	s.sum = 111;
 	s.avg = 123;
 
-	plfv f1; 
+	plfv f1;
 
 	jit_prolog(p, &f1);
 
-	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(long));	// count
+	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(intptr_t));	// count
 
 	//jit_movi(p, R(1), &s); // struct
 
@@ -321,13 +321,13 @@ DEFINE_TEST(test8)
 
 	jit_fldxr(p, FR(4), R(2), R(3), sizeof(float));
 	jit_faddr(p, FR(5), FR(5), FR(4));
-	
+
 	jit_addi(p, R(3), R(3), sizeof(float));
 	jit_subi(p, R(0), R(0), 1);
 
 	jit_bgti(p, loop, R(0), 0);
 	jit_fsti(p, (unsigned char *)&s + offsetof(struct mystruct, sum), FR(5), sizeof(float));
-	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(long));	// count
+	jit_ldi(p, R(0), (unsigned char *)&s + offsetof(struct mystruct, count), sizeof(intptr_t));	// count
 
 	jit_extr(p, FR(0), R(0));
 	jit_fdivr(p, FR(5), FR(5), FR(0));
@@ -368,7 +368,7 @@ double incd(double x, double y) {
 
 DEFINE_TEST(test10)
 {
-	pdfd f1; 
+	pdfd f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
@@ -394,7 +394,7 @@ double addd(double x, double y) {
 
 DEFINE_TEST(test11)
 {
-	pdfd f1; 
+	pdfd f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
@@ -421,7 +421,7 @@ double addid(int x, double y) {
 
 DEFINE_TEST(test12)
 {
-	pdfd f1; 
+	pdfd f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
@@ -447,7 +447,7 @@ double addiid(int x, int y, double z) {
 
 DEFINE_TEST(test13)
 {
-	pdfd f1; 
+	pdfd f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
@@ -474,7 +474,7 @@ float addiif(int x, int y, float z) {
 
 DEFINE_TEST(test14)
 {
-	pfff f1; 
+	pfff f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(float));
@@ -497,7 +497,7 @@ DEFINE_TEST(test14)
 
 DEFINE_TEST(test15)
 {
-	pffd f1; 
+	pffd f1;
 
 	jit_prolog(p, &f1);
 	jit_declare_arg(p, JIT_FLOAT_NUM, sizeof(double));
@@ -529,12 +529,12 @@ void test_setup()
 	SETUP_TEST(test4);
 	SETUP_TEST(test5);
 	SETUP_TEST(test6);
-	SETUP_TEST(test7); 
-	SETUP_TEST(test8); 
-	SETUP_TEST(test10); 
-	SETUP_TEST(test11); 
-	SETUP_TEST(test12); 
-	SETUP_TEST(test13); 
-	SETUP_TEST(test14); 
-	SETUP_TEST(test15); 
+	SETUP_TEST(test7);
+	SETUP_TEST(test8);
+	SETUP_TEST(test10);
+	SETUP_TEST(test11);
+	SETUP_TEST(test12);
+	SETUP_TEST(test13);
+	SETUP_TEST(test14);
+	SETUP_TEST(test15);
 }

@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+#include "mman-win32/mman.h"
 #include <unistd.h>
 #include <string.h>
 #include "jitlib.h"
@@ -62,8 +62,8 @@ typedef struct {
 } jit_hw_reg;
 
 struct jit_reg_allocator {
-	int gp_reg_cnt;				// number of general purpose registers 
-	int fp_reg_cnt;				// number of floating-point registers 
+	int gp_reg_cnt;				// number of general purpose registers
+	int fp_reg_cnt;				// number of floating-point registers
 	int fp_reg; 				// frame pointer; register used to access the local variables
 	int gp_arg_reg_cnt;			// number of GP registers used to pass arguments
 	int fp_arg_reg_cnt;			// number of FP registers used to pass arguments
@@ -72,8 +72,8 @@ struct jit_reg_allocator {
 
 	jit_hw_reg * gp_regs;			// array of available GP registers
 	jit_hw_reg * fp_regs;			// array of available floating-point registers
-	jit_hw_reg ** gp_arg_regs;		// array of GP registers used to pass arguments (in the given order) 
-	jit_hw_reg ** fp_arg_regs;		// array of FP registers used to pass arguments (in the given order) 
+	jit_hw_reg ** gp_arg_regs;		// array of GP registers used to pass arguments (in the given order)
+	jit_hw_reg ** fp_arg_regs;		// array of FP registers used to pass arguments (in the given order)
 	struct jit_func_info * current_func_info; // information on currently processed function
 };
 
@@ -97,7 +97,7 @@ typedef struct jit_prepared_args {
 	jit_op * op;	// corresponding ``PREPARE'' operation
 	struct jit_out_arg {// array of arguments
 		union {
-			long generic;
+			intptr_t generic;
 			double fp;
 		} value;
 		int argpos; // position in the list of GP or FP arguments
@@ -114,13 +114,13 @@ typedef struct jit_set {
 struct jit_func_info {			// collection of information related to one function
 	int general_arg_cnt;		// number of non-FP arguments
 	int float_arg_cnt;		// number of FP arguments
-	long allocai_mem;		// size of the locally allocated memory
+	intptr_t allocai_mem;		// size of the locally allocated memory
 	int arg_capacity;		// size of the `args' array
-	struct jit_inp_arg { 
+	struct jit_inp_arg {
 		enum jit_inp_type type; // type of the argument
 		int size;		// its size
 		char passed_by_reg; 	// indicates whether the argument was passed by register
-		union { 
+		union {
 			int reg;
 			int stack_pos;
 		} location;		// location of the value
@@ -128,7 +128,7 @@ struct jit_func_info {			// collection of information related to one function
 		int gp_pos;		// position of the argument in the list of GP/FP
 		int fp_pos;		// position of the argument in the list of GP/FP
 		int overflow;		// indicates whether one argument overflow into the adjacent register
-		int phys_reg;		
+		int phys_reg;
 	} * args;			// collection of all arguments
 
 	int gp_reg_count;		// total number of GP registers used in the processed function
@@ -200,7 +200,7 @@ void rmap_free(jit_rmap * regmap);
 void jit_allocator_hints_free(jit_tree *);
 
 
-static struct jit_op * jit_op_new(unsigned short code, unsigned char spec, long arg1, long arg2, long arg3, unsigned char arg_size)
+static struct jit_op * jit_op_new(unsigned short code, unsigned char spec, intptr_t arg1, intptr_t arg2, intptr_t arg3, unsigned char arg_size)
 {
 	struct jit_op * r = JIT_MALLOC(sizeof(struct jit_op));
 	r->code = code;

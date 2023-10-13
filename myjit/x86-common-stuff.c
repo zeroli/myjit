@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * Common stuff for i386 and AMD64 platforms
@@ -13,17 +13,17 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <stdint.h>
-#define IS_32BIT_VALUE(x) ((((long)(x)) >= INT32_MIN) && (((long)(x)) <= INT32_MAX))
+#define IS_32BIT_VALUE(x) ((((intptr_t)(x)) >= INT32_MIN) && (((intptr_t)(x)) <= INT32_MAX))
 
 //
-// 
+//
 // Optimizations
 //
 //
@@ -48,7 +48,7 @@ void jit_optimize_st_ops(struct jit * jit)
 			op->prev->code = JIT_NOP;
 			op->prev->spec = SPEC(NO, NO, NO);
 		}
-		
+
 		if ((GET_OP(op) == JIT_STX)
 		&& (op->prev)
 		&& (op->prev->code == (JIT_MOV | IMM))
@@ -123,7 +123,7 @@ static inline void make_nop(jit_op * op)
 
 static jit_op * get_related_op(jit_op * op, int result_reg)
 {
-	jit_op * nextop = op->next; 
+	jit_op * nextop = op->next;
 
 	if ((nextop->arg[0] != result_reg) && (jit_set_get(nextop->live_out, result_reg))) return NULL;
 
@@ -142,7 +142,7 @@ static int join_2ops(jit_op * op, int opcode1, int opcode2, int (* joinfn)(jit_o
 	if (op->code == opcode1) {
 		jit_value result_reg = op->arg[0];
 		jit_op * nextop = get_related_op(op, result_reg);
-		if (nextop && (nextop->code == opcode2)) return joinfn(op, nextop); 
+		if (nextop && (nextop->code == opcode2)) return joinfn(op, nextop);
 	}
 	return 0;
 }
@@ -245,7 +245,7 @@ int jit_optimize_join_addmul(struct jit * jit)
 }
 
 // combines:
-// addr r1, r2, r3 
+// addr r1, r2, r3
 // addi r4, r1, imm
 // -->
 // addimm r4, r2, r3, imm  i.e., r4 := r2 + r3 + imm
@@ -267,7 +267,7 @@ static int join_addr_addi(jit_op * op, jit_op * nextop)
 }
 
 // combines:
-// addi r1, r2, imm 
+// addi r1, r2, imm
 // addr r3, r1, r4 (or addr r3, r4, r1)
 // -->
 // addimm r3, r2, r4, imm  i.e., r3 := r2 + r4 + imm

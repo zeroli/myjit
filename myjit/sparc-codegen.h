@@ -234,7 +234,7 @@ typedef enum {
 	sparc_membar_store_load = 0x2,
 	sparc_membar_load_store = 0x4,
 	sparc_membar_store_store = 0x8,
-   
+
 	sparc_membar_lookaside = 0x10,
 	sparc_membar_memissue = 0x20,
 	sparc_membar_sync = 0x40,
@@ -690,9 +690,9 @@ typedef struct {
 #define sparc_faddd(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_faddd_val, r2, dest )
 #define sparc_faddq(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_faddq_val, r2, dest )
 
-#define sparc_fsubs(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubs_val, r2, dest ) 
-#define sparc_fsubd(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubd_val, r2, dest ) 
-#define sparc_fsubq(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubq_val, r2, dest ) 
+#define sparc_fsubs(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubs_val, r2, dest )
+#define sparc_fsubd(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubd_val, r2, dest )
+#define sparc_fsubq(ins, r1, r2, dest) sparc_fop( ins, r1, sparc_fsubq_val, r2, dest )
 
 #define sparc_fmuls( ins, r1, r2, dest ) sparc_fop( ins, r1, sparc_fmuls_val, r2, dest )
 #define sparc_fmuld( ins, r1, r2, dest ) sparc_fop( ins, r1, sparc_fmuld_val, r2, dest )
@@ -745,7 +745,7 @@ typedef struct {
 #define sparc_fcmpq( ins, r1, r2 ) sparc_fcmp( ins, r1, sparc_fcmpq_val, r2 )
 #define sparc_fcmpes( ins, r1, r2 ) sparc_fcmpes( ins, r1, sparc_fcmpes_val, r2 )
 #define sparc_fcmped( ins, r1, r2 ) sparc_fcmped( ins, r1, sparc_fcmped_val, r2 )
-#define sparc_fcmpeq( ins, r1, r2 ) sparc_fcmpeq( ins, r1, sparc_fcmpeq_val, r2 ) 
+#define sparc_fcmpeq( ins, r1, r2 ) sparc_fcmpeq( ins, r1, sparc_fcmpeq_val, r2 )
 
 /* logical */
 
@@ -964,9 +964,9 @@ typedef struct {
 #endif
 
 #define sparc_patch(target, pos) do { \
-	long __p =  ((long)(pos)) >> 2; \
-	long __t =  ((long)(target)) >> 2; \
-	long __location = (__p - __t); \
+	intptr_t __p =  ((intptr_t)(pos)) >> 2; \
+	intptr_t __t =  ((intptr_t)(target)) >> 2; \
+	intptr_t __location = (__p - __t); \
 	sparc_format2a *__f = (sparc_format2a*)(target);	\
 	if (__f->op == 0) {\
 		/* branch */ \
@@ -980,4 +980,3 @@ typedef struct {
 } while (0);
 
 #endif /* __SPARC_CODEGEN_H__ */
-

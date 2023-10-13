@@ -1,5 +1,5 @@
 /*
- * MyJIT 
+ * MyJIT
  * Copyright (C) 2010, 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
  * This library is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -25,7 +25,7 @@ static inline int GET_REG_POS(struct jit * jit, int r)
 	if (JIT_REG_SPEC(r) == JIT_RTYPE_REG) {
 		if (JIT_REG_TYPE(r) == JIT_RTYPE_INT) return GET_GPREG_POS(jit, r);
 		else return GET_FPREG_POS(jit, r);
-	} else assert(0); 
+	} else assert(0);
 }
 
 #include "x86-common-stuff.c"
@@ -41,7 +41,7 @@ void jit_init_arg_params(struct jit * jit, struct jit_func_info * info, int p, i
 		a->location.stack_pos = prev_a->location.stack_pos + stack_shift;
 	}
 
-	a->spill_pos = a->location.stack_pos; 
+	a->spill_pos = a->location.stack_pos;
 	a->passed_by_reg = 0;
 	a->overflow = 0;
 }
@@ -63,11 +63,11 @@ static int emit_arguments(struct jit * jit)
 
 	int sreg;
 	for (int i = jit->prepared_args.ready - 1; i >= 0; i--) {
-		long value = args[i].value.generic;
+		intptr_t value = args[i].value.generic;
 		if (!args[i].isfp) { // integers
 			if (!args[i].isreg) x86_push_imm(jit->ip, args[i].value.generic);
 			else {
-				if (is_spilled(value, jit->prepared_args.op, &sreg)) 
+				if (is_spilled(value, jit->prepared_args.op, &sreg))
 					x86_push_membase(jit->ip, X86_EBP, GET_REG_POS(jit, args[i].value.generic));
 				else x86_push_reg(jit->ip, sreg);
 			}
@@ -75,7 +75,7 @@ static int emit_arguments(struct jit * jit)
 		}
 		//
 		// floats (double)
-		// 
+		//
 		if (args[i].size == sizeof(double)) {
 			if (args[i].isreg) { // doubles
 				if (is_spilled(value, jit->prepared_args.op, &sreg)) {
@@ -98,16 +98,16 @@ static int emit_arguments(struct jit * jit)
 		//
 		// single prec. floats
 		//
-		if (args[i].isreg) { 
+		if (args[i].isreg) {
 			if (is_spilled(value, jit->prepared_args.op, &sreg)) {
 				int pos = GET_FPREG_POS(jit, args[i].value.generic);
-				x86_fld_membase(jit->ip, X86_EBP, pos, 1); 
+				x86_fld_membase(jit->ip, X86_EBP, pos, 1);
 				x86_alu_reg_imm(jit->ip, X86_SUB, X86_ESP, 4);
 				x86_fst_membase(jit->ip, X86_ESP, 0, 0, 1);
 			} else {
 				// pushes the value beyond the top of the stack
-				x86_movlpd_membase_xreg(jit->ip, sreg, X86_ESP, -8); 
-				x86_fld_membase(jit->ip, X86_ESP, -8, 1); 
+				x86_movlpd_membase_xreg(jit->ip, sreg, X86_ESP, -8);
+				x86_fld_membase(jit->ip, X86_ESP, -8, 1);
 				x86_alu_reg_imm(jit->ip, X86_SUB, X86_ESP, 4);
 				x86_fst_membase(jit->ip, X86_ESP, 0, 0, 1);
 			}
@@ -128,11 +128,11 @@ static void emit_funcall(struct jit * jit, struct jit_op * op, int imm)
 	if (!imm) {
 		x86_call_reg(jit->ip, op->r_arg[0]);
 	} else {
-		op->patch_addr = JIT_BUFFER_OFFSET(jit); 
+		op->patch_addr = JIT_BUFFER_OFFSET(jit);
 		x86_call_imm(jit->ip, JIT_GET_ADDR(jit, op->r_arg[0]) - 4); /* 4: magic constant */
 	}
-	
-	if (jit->prepared_args.stack_size + stack_correction) 
+
+	if (jit->prepared_args.stack_size + stack_correction)
 		x86_alu_reg_imm(jit->ip, X86_ADD, X86_ESP, jit->prepared_args.stack_size + stack_correction);
 	JIT_FREE(jit->prepared_args.args);
 
@@ -143,13 +143,13 @@ void jit_patch_external_calls(struct jit * jit)
 {
 	for (jit_op * op = jit_op_first(jit->ops); op != NULL; op = op->next) {
 		if ((op->code == (JIT_CALL | IMM)) && (!jit_is_label(jit, (void *)op->arg[0])))
-			x86_patch(jit->buf + (long)op->patch_addr, (unsigned char *)op->arg[0]);
+			x86_patch(jit->buf + (intptr_t)op->patch_addr, (unsigned char *)op->arg[0]);
 		if (GET_OP(op) == JIT_MSG)
-			x86_patch(jit->buf + (long)op->patch_addr, (unsigned char *)printf);
+			x86_patch(jit->buf + (intptr_t)op->patch_addr, (unsigned char *)printf);
 		if (GET_OP(op) == JIT_FMSG)
 			x86_patch(jit->buf + (double)op->patch_addr, (unsigned char *)printf);
-		if (GET_OP(op) == JIT_TRACE) 
-			x86_patch(jit->buf + (long)op->patch_addr, (unsigned char *)jit_trace_callback);
+		if (GET_OP(op) == JIT_TRACE)
+			x86_patch(jit->buf + (intptr_t)op->patch_addr, (unsigned char *)jit_trace_callback);
 	}
 }
 
@@ -158,7 +158,7 @@ static void emit_prolog_op(struct jit * jit, jit_op * op)
 	jit->current_func = op;
 	struct jit_func_info * info = jit_current_func_info(jit);
 	int prolog = jit_current_func_info(jit)->has_prolog;
-	while ((long)jit->ip % 8) 
+	while ((intptr_t)jit->ip % 8)
 		x86_nop(jit->ip);
 
 	op->patch_addr = JIT_BUFFER_OFFSET(jit);
@@ -182,7 +182,7 @@ static void emit_msg_op(struct jit * jit, jit_op * op)
 
 	if (!IS_IMM(op)) x86_push_reg(jit->ip, op->r_arg[1]);
 	x86_push_imm(jit->ip, op->r_arg[0]);
-	op->patch_addr = JIT_BUFFER_OFFSET(jit); 
+	op->patch_addr = JIT_BUFFER_OFFSET(jit);
 	x86_call_imm(jit->ip, printf);
 	if (IS_IMM(op)) x86_alu_reg_imm(jit->ip, X86_ADD, X86_ESP, 4);
 	else x86_alu_reg_imm(jit->ip, X86_ADD, X86_ESP, 8);
@@ -191,10 +191,10 @@ static void emit_msg_op(struct jit * jit, jit_op * op)
 }
 
 static void emit_trace_op(struct jit *jit, jit_op *op)
-{       
+{
 	int trace = 0;
 	emit_save_all_regs(jit, op);
-        
+
 	jit_opcode prev_code = GET_OP(op->prev);
 	jit_opcode next_code = GET_OP(op->next);
 	if ((prev_code == JIT_PROLOG) || (prev_code == JIT_LABEL) || (prev_code == JIT_PATCH)) trace |= TRACE_PREV;
@@ -205,7 +205,7 @@ static void emit_trace_op(struct jit *jit, jit_op *op)
 	x86_push_imm(jit->ip, op);
 	x86_push_imm(jit->ip, jit);
 
-	op->patch_addr = JIT_BUFFER_OFFSET(jit); 
+	op->patch_addr = JIT_BUFFER_OFFSET(jit);
 	x86_call_imm(jit->ip, jit_trace_callback);
 	x86_alu_reg_imm(jit->ip, X86_ADD, X86_ESP, 16);
 

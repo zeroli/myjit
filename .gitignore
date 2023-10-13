@@ -1,7 +1,8 @@
 *.o
-demo1
-demo2
-demo3
+*.exe
+demo1*
+demo2*
+demo3*
 test/t001
 test/t002
 test/t003

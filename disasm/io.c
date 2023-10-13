@@ -1,5 +1,5 @@
 /*
- * MyJIT Disassembler 
+ * MyJIT Disassembler
  *
  * Copyright (C) 2015 Petr Krajca, <petr.krajca@upol.cz>
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -61,9 +61,9 @@ static int output_print_bytes(unsigned char *data, int size)
 	return out;
 }
 
-void output_code(unsigned long addr, unsigned char *data, int size, char *text)
+void output_code(uintptr_t  addr, unsigned char *data, int size, char *text)
 {
-	printf("  %04lx: ", addr & 0xffff);
+	printf("  %04llx: ", addr & 0xffff);
 	int out = output_print_bytes(data, size);
 	printf("   %s\n", text);
 	while (out < size) {

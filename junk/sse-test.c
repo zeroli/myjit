@@ -69,9 +69,9 @@ int main()
 	x86_sse_alu_pd_reg_reg(buf, X86_SSE_DIV, X86_XMM0, X86_XMM1);
 
 
-	// pushes FP number on the top of the stack 
-	// x86_push_imm(buf, *((unsigned long long *)&b) >> 32);
-	// x86_push_imm(buf, *((unsigned long long *)&b) && 0xffffffff);
+	// pushes FP number on the top of the stack
+	// x86_push_imm(buf, *((uintptr_t  *)&b) >> 32);
+	// x86_push_imm(buf, *((uintptr_t  *)&b) && 0xffffffff);
 
 	x86_alu_reg_imm(buf, X86_SUB, X86_ESP, 8);	// creates extra space on the stack
 	x86_movlpd_membase_xreg(buf, X86_XMM0, X86_ESP, 0); // pushes the value on the top of the stack
