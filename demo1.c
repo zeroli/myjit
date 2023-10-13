@@ -5,7 +5,7 @@
 #include "myjit/jitlib.h"
 
 // pointer to a function accepting one argument of type long and returning long value
-typedef long long (* plfl)(intptr_t);
+typedef long long (* plfl)(long long);
 
 int main()
 {
@@ -30,11 +30,11 @@ int main()
 	// returns from the function and returns the value in register R(1)
 	jit_retr(p, R(1));
 
+	// if you are interested, you can dump the op code
+	jit_dump_ops(p, JIT_DEBUG_OPS);
+
 	// compiles the above defined code
 	jit_generate_code(p);
-
-	// if you are interested, you can dump the machine code
-	jit_dump_ops(p, JIT_DEBUG_CODE);
 
 	// check
 	printf("Check #1: %lli\n", foo(1));

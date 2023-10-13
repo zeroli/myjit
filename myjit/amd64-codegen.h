@@ -69,6 +69,8 @@ typedef enum
   AMD64_REX_W = 8  /* Opeartion is 64-bits instead of 32 (default) or 16 (with 0x66 prefix) */
 } AMD64_REX_Bits;
 
+#define TARGET_WIN32
+
 #ifdef TARGET_WIN32
 #define AMD64_ARG_REG1 AMD64_RCX
 #define AMD64_ARG_REG2 AMD64_RDX
